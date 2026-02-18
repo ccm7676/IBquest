@@ -34,6 +34,23 @@
                 color: var(--accent);
             }
 
+            .back-btn {
+                position: absolute;
+                top: 20px;
+                left: 20px;
+                font-size: 1.2rem;
+                color: white;
+                text-decoration: none;
+                z-index: 100;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                font-weight: 600;
+                transition: opacity 0.15s;
+            }
+            .back-btn:hover {
+                opacity: 0.7;
+            }
+
             .hs-row {
                 display: flex;
                 gap: 12px;
@@ -66,7 +83,7 @@
                 gap: 12px;
                 flex-wrap: wrap;
                 justify-content: center;
-                max-width: 820px;
+                max-width: 700px;
                 width: 100%;
             }
             .mode-card {
@@ -100,6 +117,8 @@
             .filter-box {
                 max-width: 700px;
                 width: 100%;
+                max-height: 30vh;
+                overflow-y: auto;
                 background: var(--surface);
                 border: 1px solid var(--border);
                 border-radius: 4px;
@@ -609,10 +628,15 @@
                 }
                 .mode-grid {
                     flex-direction: column;
-                    align-items: center;
+                    align-items: stretch;
+                    width: 100%;
+                    max-width: 700px;
                 }
                 .mode-card {
-                    max-width: 100%;
+                    width: 100%;
+                    flex: none;
+                    min-width: auto;
+                    max-width: none;
                 }
             }
         </style>
@@ -629,7 +653,7 @@
 
         <!-- ════════════════ START ════════════════ -->
         <div class="screen active" id="start-screen">
-            <a href="../index.html" style="align-self:flex-start;font-size:0.75rem;color:var(--text3);text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;">← Back</a>
+            <a href="../index.html" class="back-btn">← Back</a>
             <div class="wordmark">Physics<span>Match</span></div>
 
             <div class="hs-row" id="hs-row"></div>
@@ -2769,16 +2793,16 @@
             function reportToGlobal(score) {
                 // XP
                 const xp =
-                    parseInt(localStorage.getItem("gfib_xp") || "0") + score;
-                localStorage.setItem("gfib_xp", xp);
+                    parseInt(localStorage.getItem("ibq_xp") || "0") + score;
+                localStorage.setItem("ibq_xp", xp);
                 // Daily streak
                 const today = new Date().toISOString().slice(0, 10);
-                const last = localStorage.getItem("gfib_streak_date") || "";
+                const last = localStorage.getItem("ibq_streak_date") || "";
                 const yesterday = new Date(Date.now() - 86400000)
                     .toISOString()
                     .slice(0, 10);
                 let streak = parseInt(
-                    localStorage.getItem("gfib_streak_count") || "0",
+                    localStorage.getItem("ibq_streak_count") || "0",
                 );
                 if (last === today) {
                     /* no change */
@@ -2787,8 +2811,8 @@
                 } else {
                     streak = 1;
                 }
-                localStorage.setItem("gfib_streak_date", today);
-                localStorage.setItem("gfib_streak_count", streak);
+                localStorage.setItem("ibq_streak_date", today);
+                localStorage.setItem("ibq_streak_count", streak);
             }
 
             // ═══════════════════════════════════════════════════

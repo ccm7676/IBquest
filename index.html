@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>GamefIB | Free IBDP Revision Games</title>
+        <title>IBquest | Free IBDP Revision Games</title>
         <link rel="stylesheet" href="styles.css" />
         <style>
             /* ── HOME PAGE OVERRIDES & LAYOUT ─────────── */
@@ -105,7 +105,7 @@
                 display: flex;
                 flex-direction: column;
                 gap: 2px;
-                align-items: flex-start;
+                align-items: center;
             }
             .streak-badge {
                 font-size: 2rem;
@@ -257,7 +257,7 @@
 
         <div class="home-wrap">
             <header>
-                <div class="wordmark">Gamef<span>IB</span></div>
+                <div class="wordmark">IB<span>quest</span></div>
             </header>
 
             <div class="player-bar">
@@ -332,12 +332,12 @@
             //  PLAYER BAR
             // ═══════════════════════════════════════════════════
             function renderPlayerBar() {
-                const xp = parseInt(localStorage.getItem("gfib_xp") || "0");
+                const xp = parseInt(localStorage.getItem("ibq_xp") || "0");
                 const streak = parseInt(
-                    localStorage.getItem("gfib_streak_count") || "0",
+                    localStorage.getItem("ibq_streak_count") || "0",
                 );
                 const today = new Date().toISOString().slice(0, 10);
-                const lastDay = localStorage.getItem("gfib_streak_date") || "";
+                const lastDay = localStorage.getItem("ibq_streak_date") || "";
                 const yesterday = new Date(Date.now() - 86400000)
                     .toISOString()
                     .slice(0, 10);
