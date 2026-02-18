@@ -296,13 +296,13 @@
             //  LEVEL FORMULA  (L1=0, L2=100, L3=400, L4=900 XP…)
             // ═══════════════════════════════════════════════════
             function getLevel(xp) {
-                return Math.floor(Math.sqrt(xp / 100)) + 1;
+                return Math.floor(Math.sqrt(xp / 1000)) + 1;
             }
             function xpForLevel(l) {
-                return (l - 1) * (l - 1) * 100;
+                return (l - 1) * (l - 1) * 1000;
             }
             function xpForNextLevel(l) {
-                return l * l * 100;
+                return l * l * 1000;
             }
 
             // ═══════════════════════════════════════════════════
@@ -361,9 +361,7 @@
                 document.getElementById("streak-count").textContent =
                     activeStreak;
                 streakEl.className =
-                    activeStreak > 0
-                        ? "streak-col"
-                        : "streak-col inactive";
+                    activeStreak > 0 ? "streak-col" : "streak-col inactive";
             }
 
             // ═══════════════════════════════════════════════════
