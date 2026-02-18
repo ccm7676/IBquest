@@ -1,0 +1,183 @@
+/* ═══════════════════════════════════════════════════
+   gamefIB — Global Design System
+   Shared by all games. Game-specific styles stay in
+   each game's own <style> block.
+   ═══════════════════════════════════════════════════ */
+
+/* ── RESET ────────────────────────────────────────── */
+* { margin:0; padding:0; box-sizing:border-box; }
+
+/* ── DESIGN TOKENS ────────────────────────────────── */
+:root {
+  --bg:       #111111;
+  --surface:  #1a1a1a;
+  --border:   #2e2e2e;
+  --border2:  #222222;
+  --text:     #ebebeb;
+  --text2:    #888888;
+  --text3:    #555555;
+  --accent:   #B0ADFF;
+  --green:    #4caf6e;
+  --red:      #e05252;
+  --yellow:   #c9922a;
+  --orange:   #c97a3a;
+  --purple:   #9b9b9b;
+}
+
+/* ── BASE ─────────────────────────────────────────── */
+html, body {
+  width:100%; height:100%;
+  background:var(--bg);
+  color:var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-size:16px;
+  overflow:hidden;
+  user-select:none;
+}
+
+/* ── SCREENS ──────────────────────────────────────── */
+.screen {
+  position:fixed; inset:0;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  z-index:10;
+  opacity:0; pointer-events:none;
+  transition:opacity .25s;
+  overflow-y:auto;
+  padding:20px;
+}
+.screen.active { opacity:1; pointer-events:all; }
+
+/* ── BUTTONS ──────────────────────────────────────── */
+.btn-primary {
+  padding:16px 0;
+  width:min(340px, 100%);
+  font-size:1.05rem; font-weight:700;
+  letter-spacing:.12em; text-transform:uppercase;
+  background:var(--accent); color:#0c0c18;
+  border:none; border-radius:3px;
+  cursor:pointer;
+  transition:opacity .15s, transform .1s, box-shadow .15s;
+  box-shadow:0 0 0 rgba(176,173,255,0);
+}
+.btn-primary:hover {
+  opacity:.92;
+  box-shadow:0 0 20px rgba(176,173,255,.3);
+}
+.btn-primary:active { transform:scale(.97); }
+
+.btn-ghost {
+  padding:11px 28px;
+  font-size:.88rem; font-weight:700;
+  letter-spacing:.06em; text-transform:uppercase;
+  background:transparent;
+  border:1px solid var(--border);
+  border-radius:3px; color:var(--text);
+  cursor:pointer; transition:border-color .15s, color .15s;
+}
+.btn-ghost:hover { border-color:var(--text2); color:var(--text); }
+
+/* ── BADGE ────────────────────────────────────────── */
+.badge {
+  display:inline-block;
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--border);
+  color:var(--text2); font-size:.65rem;
+  padding:2px 9px; border-radius:3px;
+  letter-spacing:.08em; text-transform:uppercase;
+}
+
+/* ── CANVAS OVERLAYS ──────────────────────────────── */
+canvas#bg {
+  position:fixed; inset:0;
+  pointer-events:none; z-index:0;
+}
+canvas#confetti {
+  position:fixed; inset:0;
+  pointer-events:none; z-index:140;
+}
+
+/* ── FLASH ────────────────────────────────────────── */
+.flash {
+  position:fixed; inset:0; z-index:100;
+  pointer-events:none; opacity:0;
+  transition:opacity .12s;
+}
+
+/* ── COMBO POP ────────────────────────────────────── */
+.combo-pop {
+  position:fixed; top:50%; left:50%;
+  transform:translate(-50%,-50%) scale(0);
+  z-index:200; pointer-events:none;
+  font-size:clamp(2rem,7vw,3.5rem);
+  font-weight:900; text-align:center;
+  transition:transform .25s cubic-bezier(.34,1.56,.64,1);
+  white-space:nowrap;
+}
+.combo-pop.show { transform:translate(-50%,-50%) scale(1); }
+
+/* ── LEVEL UP ─────────────────────────────────────── */
+.lvlup-overlay {
+  position:fixed; inset:0; z-index:150;
+  display:flex; align-items:center; justify-content:center;
+  pointer-events:none; opacity:0; transition:opacity .3s;
+}
+.lvlup-text {
+  font-size:clamp(3rem,10vw,6rem);
+  font-weight:900; color:var(--yellow);
+  text-shadow:0 0 40px rgba(210,153,34,.7);
+  animation:lvlspin .5s ease-out;
+}
+
+/* ── FEEDBACK ─────────────────────────────────────── */
+.feedback {
+  position:fixed; top:70px; left:50%;
+  transform:translateX(-50%) translateY(-10px);
+  z-index:250; pointer-events:none;
+  padding:9px 22px; border-radius:3px;
+  font-size:.88rem; font-weight:600;
+  opacity:0; transition:all .25s;
+  white-space:nowrap; letter-spacing:.03em;
+}
+.feedback.show { opacity:1; transform:translateX(-50%) translateY(0); }
+.feedback.good { background:rgba(63,185,80,.15); border:1px solid var(--green); color:var(--green); }
+.feedback.bad  { background:rgba(248,81,73,.12); border:1px solid var(--red); color:var(--red); }
+
+/* ── SCORE POP ────────────────────────────────────── */
+.score-pop {
+  position:fixed; pointer-events:none; z-index:300;
+  font-size:1.3rem; font-weight:800;
+  animation:sfloat 1s ease-out forwards;
+}
+
+/* ── KEYFRAMES ────────────────────────────────────── */
+@keyframes sfloat {
+  0%   { opacity:1; transform:translateY(0) scale(1); }
+  100% { opacity:0; transform:translateY(-70px) scale(1.2); }
+}
+
+@keyframes shake {
+  0%,100% { transform:translateX(0); }
+  15%     { transform:translateX(-9px) rotate(-.4deg); }
+  35%     { transform:translateX(9px) rotate(.4deg); }
+  55%     { transform:translateX(-6px); }
+  75%     { transform:translateX(6px); }
+  90%     { transform:translateX(-3px); }
+}
+.shaking { animation:shake .45s ease; }
+
+@keyframes fpulse {
+  from { box-shadow:0 0 4px rgba(219,109,40,.3); }
+  to   { box-shadow:0 0 14px rgba(219,109,40,.7); }
+}
+
+@keyframes lvlspin {
+  0%   { transform:scale(0) rotate(-8deg); }
+  60%  { transform:scale(1.1); }
+  100% { transform:scale(1); }
+}
+
+@keyframes blink {
+  0%,100% { opacity:1 }
+  50%     { opacity:.4 }
+}

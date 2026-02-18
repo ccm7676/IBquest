@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>gamefIB</title>
+        <link rel="stylesheet" href="styles.css" />
+        <style>
+            /* ── HOME PAGE OVERRIDES & LAYOUT ─────────── */
+            body {
+                overflow: auto;
+            }
+
+            .home-wrap {
+                position: relative;
+                z-index: 10;
+                max-width: 820px;
+                margin: 0 auto;
+                padding: 40px 20px;
+                display: flex;
+                flex-direction: column;
+                gap: 32px;
+                min-height: 100vh;
+            }
+
+            /* ── WORDMARK ─────────────────────────────── */
+            .wordmark {
+                font-size: clamp(2.6rem, 8vw, 4rem);
+                font-weight: 800;
+                letter-spacing: -1px;
+                color: var(--text);
+            }
+            .wordmark span {
+                color: var(--accent);
+            }
+
+            /* ── PLAYER BAR ───────────────────────────── */
+            .player-bar {
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: 4px;
+                padding: 20px 24px;
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+            }
+            .player-bar-top {
+                display: flex;
+                align-items: center;
+                gap: 16px;
+                flex-wrap: wrap;
+            }
+            .level-col {
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+            }
+            .level-label {
+                font-size: 0.6rem;
+                color: var(--text3);
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+            }
+            .level-badge {
+                font-size: 2rem;
+                font-weight: 800;
+                color: var(--accent);
+                line-height: 1;
+            }
+            .xp-col {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                min-width: 120px;
+            }
+            .xp-bar-row {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .xp-track-home {
+                flex: 1;
+                height: 4px;
+                background: var(--border2);
+                border-radius: 2px;
+                overflow: hidden;
+            }
+            .xp-fill-home {
+                height: 100%;
+                border-radius: 2px;
+                background: var(--accent);
+                transition: width 0.4s ease;
+            }
+            .xp-text {
+                font-size: 0.68rem;
+                color: var(--text3);
+                white-space: nowrap;
+            }
+            .streak-display {
+                font-size: 1rem;
+                font-weight: 700;
+                color: var(--yellow);
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                white-space: nowrap;
+            }
+            .streak-display.inactive {
+                color: var(--text3);
+            }
+
+            /* ── SECTION LABEL ────────────────────────── */
+            .section-label {
+                font-size: 0.68rem;
+                color: var(--text3);
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                margin-bottom: 4px;
+            }
+
+            /* ── GAMES GRID ───────────────────────────── */
+            .games-grid {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 16px;
+            }
+
+            /* ── GAME CARD ────────────────────────────── */
+            .game-card {
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: 4px;
+                padding: 24px;
+                min-width: 260px;
+                flex: 1;
+                max-width: 360px;
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+            }
+            .game-card-title {
+                font-size: 1.1rem;
+                font-weight: 700;
+                color: var(--text);
+            }
+            .game-card-desc {
+                font-size: 0.82rem;
+                color: var(--text2);
+                margin-top: 4px;
+            }
+            .game-hs-row {
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+            .game-hs-chip {
+                background: var(--bg);
+                border: 1px solid var(--border2);
+                border-radius: 3px;
+                padding: 6px 10px;
+                font-size: 0.62rem;
+                color: var(--text3);
+                text-transform: uppercase;
+                letter-spacing: 0.06em;
+            }
+            .game-hs-chip strong {
+                display: block;
+                font-size: 0.85rem;
+                font-weight: 700;
+                color: var(--accent);
+                margin-top: 2px;
+                letter-spacing: 0;
+            }
+            .game-play-btn {
+                align-self: flex-start;
+                padding: 10px 28px;
+                font-size: 0.9rem;
+                font-weight: 700;
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                background: var(--accent);
+                color: #0c0c18;
+                border: none;
+                border-radius: 3px;
+                cursor: pointer;
+                text-decoration: none;
+                display: inline-block;
+                transition:
+                    opacity 0.15s,
+                    box-shadow 0.15s;
+            }
+            .game-play-btn:hover {
+                opacity: 0.9;
+                box-shadow: 0 0 16px rgba(176, 173, 255, 0.3);
+            }
+
+            /* ── COMING SOON CARD ─────────────────────── */
+            .coming-soon-card {
+                background: transparent;
+                border: 1px dashed var(--border);
+                border-radius: 4px;
+                padding: 24px;
+                min-width: 260px;
+                flex: 1;
+                max-width: 360px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+                text-align: center;
+            }
+            .coming-soon-title {
+                font-size: 1.5rem;
+                color: var(--text3);
+                font-weight: 700;
+            }
+
+            /* ── RESPONSIVE ───────────────────────────── */
+            @media (max-width: 600px) {
+                .home-wrap {
+                    padding: 24px 16px;
+                    gap: 24px;
+                }
+                .games-grid {
+                    flex-direction: column;
+                }
+                .game-card,
+                .coming-soon-card {
+                    max-width: 100%;
+                }
+                .player-bar {
+                    padding: 16px 18px;
+                }
+                .level-badge {
+                    font-size: 1.6rem;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="bg"></canvas>
+
+        <div class="home-wrap">
+            <header>
+                <div class="wordmark">Gamef<span>IB</span></div>
+            </header>
+
+            <div class="player-bar">
+                <div class="player-bar-top">
+                    <div class="level-col">
+                        <div class="level-label">Level</div>
+                        <div class="level-badge" id="level-num">1</div>
+                    </div>
+                    <div class="xp-col">
+                        <div class="xp-bar-row">
+                            <div class="xp-track-home">
+                                <div
+                                    class="xp-fill-home"
+                                    id="xp-fill-home"
+                                    style="width: 0%"
+                                ></div>
+                            </div>
+                        </div>
+                        <div class="xp-text" id="xp-text">0 / 100 XP</div>
+                    </div>
+                    <div class="streak-display" id="streak-display">
+                        🔥 <span id="streak-count">0</span>-day streak
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="section-label">Games</div>
+                <div class="games-grid" id="games-grid"></div>
+            </div>
+        </div>
+
+        <script>
+            // ═══════════════════════════════════════════════════
+            //  LEVEL FORMULA  (L1=0, L2=100, L3=400, L4=900 XP…)
+            // ═══════════════════════════════════════════════════
+            function getLevel(xp) {
+                return Math.floor(Math.sqrt(xp / 100)) + 1;
+            }
+            function xpForLevel(l) {
+                return (l - 1) * (l - 1) * 100;
+            }
+            function xpForNextLevel(l) {
+                return l * l * 100;
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  BACKGROUND CANVAS
+            // ═══════════════════════════════════════════════════
+            const bgC = document.getElementById("bg");
+            const bgX = bgC.getContext("2d");
+
+            function resizeBg() {
+                bgC.width = window.innerWidth;
+                bgC.height = window.innerHeight;
+                drawBg();
+            }
+            function drawBg() {
+                bgX.clearRect(0, 0, bgC.width, bgC.height);
+                const sp = 40;
+                for (let x = sp / 2; x < bgC.width; x += sp)
+                    for (let y = sp / 2; y < bgC.height; y += sp) {
+                        bgX.beginPath();
+                        bgX.arc(x, y, 1, 0, Math.PI * 2);
+                        bgX.fillStyle = "rgba(255,255,255,0.05)";
+                        bgX.fill();
+                    }
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  PLAYER BAR
+            // ═══════════════════════════════════════════════════
+            function renderPlayerBar() {
+                const xp = parseInt(localStorage.getItem("gfib_xp") || "0");
+                const streak = parseInt(
+                    localStorage.getItem("gfib_streak_count") || "0",
+                );
+                const today = new Date().toISOString().slice(0, 10);
+                const lastDay = localStorage.getItem("gfib_streak_date") || "";
+                const yesterday = new Date(Date.now() - 86400000)
+                    .toISOString()
+                    .slice(0, 10);
+                const activeStreak =
+                    lastDay === today || lastDay === yesterday ? streak : 0;
+
+                const lvl = getLevel(xp);
+                const xpThis = xp - xpForLevel(lvl);
+                const xpNeeds = xpForNextLevel(lvl) - xpForLevel(lvl);
+                const pct = Math.min(100, Math.round((xpThis / xpNeeds) * 100));
+
+                document.getElementById("level-num").textContent = lvl;
+                document.getElementById("xp-fill-home").style.width = pct + "%";
+                document.getElementById("xp-text").textContent =
+                    xpThis.toLocaleString() +
+                    " / " +
+                    xpNeeds.toLocaleString() +
+                    " XP";
+
+                const streakEl = document.getElementById("streak-display");
+                document.getElementById("streak-count").textContent =
+                    activeStreak;
+                streakEl.className =
+                    activeStreak > 0
+                        ? "streak-display"
+                        : "streak-display inactive";
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  GAMES GRID
+            // ═══════════════════════════════════════════════════
+            function renderGames() {
+                const grid = document.getElementById("games-grid");
+
+                const hs = {
+                    symbol: parseInt(
+                        localStorage.getItem("pb_hs_symbol") || "0",
+                    ),
+                    equation: parseInt(
+                        localStorage.getItem("pb_hs_equation") || "0",
+                    ),
+                    scenario: parseInt(
+                        localStorage.getItem("pb_hs_scenario") || "0",
+                    ),
+                };
+
+                // Physics Match card
+                const card = document.createElement("div");
+                card.className = "game-card";
+                card.innerHTML = `
+    <div>
+      <div class="game-card-title">Physics Match</div>
+      <div class="game-card-desc">Master IB Physics equations</div>
+    </div>
+    <div class="game-hs-row">
+      <div class="game-hs-chip">Symbol<strong>${hs.symbol.toLocaleString()}</strong></div>
+      <div class="game-hs-chip">Equation<strong>${hs.equation.toLocaleString()}</strong></div>
+      <div class="game-hs-chip">Scenario<strong>${hs.scenario.toLocaleString()}</strong></div>
+    </div>
+    <a class="game-play-btn" href="games/PhysicsMatch.html">PLAY →</a>
+  `;
+                grid.appendChild(card);
+
+                // Coming soon placeholder
+                const soon = document.createElement("div");
+                soon.className = "coming-soon-card";
+                soon.innerHTML = `
+    <div class="coming-soon-title">???</div>
+    <span class="badge">Coming Soon</span>
+  `;
+                grid.appendChild(soon);
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  INIT
+            // ═══════════════════════════════════════════════════
+            resizeBg();
+            window.addEventListener("resize", resizeBg);
+            renderPlayerBar();
+            renderGames();
+        </script>
+    </body>
+</html>

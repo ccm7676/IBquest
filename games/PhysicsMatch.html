@@ -1,0 +1,2894 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Physics Match</title>
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"
+        />
+        <script
+            defer
+            src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"
+        ></script>
+        <script
+            defer
+            src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+            onload="initApp()"
+        ></script>
+        <link rel="stylesheet" href="../styles.css" />
+        <style>
+            /* ── START SCREEN ────────────────────────── */
+            #start-screen {
+                gap: 20px;
+            }
+
+            .wordmark {
+                font-size: clamp(2.6rem, 8vw, 4rem);
+                font-weight: 800;
+                letter-spacing: -1px;
+                color: var(--text);
+            }
+            .wordmark span {
+                color: var(--accent);
+            }
+
+            .hs-row {
+                display: flex;
+                gap: 12px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .hs-card {
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: 4px;
+                padding: 10px 18px;
+                text-align: center;
+                min-width: 130px;
+            }
+            .hs-card .hs-mode {
+                font-size: 0.68rem;
+                color: var(--text3);
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                margin-bottom: 2px;
+            }
+            .hs-card .hs-val {
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: var(--accent);
+            }
+
+            .mode-grid {
+                display: flex;
+                gap: 12px;
+                flex-wrap: wrap;
+                justify-content: center;
+                max-width: 820px;
+                width: 100%;
+            }
+            .mode-card {
+                flex: 1;
+                min-width: 150px;
+                max-width: 220px;
+                background: var(--surface);
+                border: 2px solid var(--border);
+                border-radius: 4px;
+                padding: 16px 18px;
+                cursor: pointer;
+                transition:
+                    border-color 0.15s,
+                    background 0.15s;
+                text-align: center;
+            }
+            .mode-card:hover {
+                border-color: var(--text3);
+                background: #202020;
+            }
+            .mode-card.selected {
+                border-color: var(--accent);
+                background: #1e1e2e;
+            }
+            .mode-title {
+                font-size: 0.95rem;
+                font-weight: 600;
+                color: var(--text);
+            }
+
+            .filter-box {
+                max-width: 700px;
+                width: 100%;
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: 4px;
+                padding: 14px 18px;
+            }
+            .filter-label {
+                font-size: 0.68rem;
+                color: var(--text3);
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                margin-bottom: 10px;
+            }
+            .chips {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+            .chip {
+                padding: 5px 12px;
+                border-radius: 3px;
+                border: 1px solid var(--border);
+                background: transparent;
+                font-size: 0.74rem;
+                cursor: pointer;
+                color: var(--text2);
+                transition: all 0.15s;
+            }
+            .chip:hover {
+                border-color: var(--text2);
+                color: var(--text);
+            }
+            .chip.on {
+                background: rgba(176, 173, 255, 0.12);
+                border-color: var(--accent);
+                color: var(--accent);
+            }
+
+            /* ── GAME SCREEN ─────────────────────────── */
+            #game-screen {
+                padding: 0;
+                justify-content: flex-start;
+                overflow: hidden;
+            }
+
+            .game-top {
+                width: 100%;
+                flex-shrink: 0;
+                background: var(--surface);
+                border-bottom: 1px solid var(--border);
+                padding: 10px 20px 0;
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                position: relative;
+                z-index: 20;
+            }
+            .game-hud {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                flex-wrap: wrap;
+            }
+
+            .lives {
+                display: flex;
+                gap: 5px;
+            }
+            .heart {
+                font-size: 1.2rem;
+                transition: opacity 0.3s;
+            }
+            .heart.lost {
+                opacity: 0.2;
+            }
+
+            .hud-group {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            .hud-lbl {
+                font-size: 0.6rem;
+                color: var(--text3);
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+            }
+            .hud-val {
+                font-size: 1.2rem;
+                font-weight: 700;
+            }
+            .hud-val.c-score {
+                color: var(--accent);
+            }
+            .hud-val.c-level {
+                color: var(--text2);
+            }
+            .hud-val.c-streak {
+                color: var(--yellow);
+            }
+
+            .streak-badge {
+                padding: 3px 12px;
+                border-radius: 3px;
+                font-size: 0.82rem;
+                font-weight: 700;
+                border: 1px solid var(--yellow);
+                color: var(--yellow);
+                background: rgba(201, 146, 42, 0.08);
+            }
+            .streak-badge.fire {
+                border-color: var(--orange);
+                color: var(--orange);
+                background: rgba(219, 109, 40, 0.12);
+                animation: fpulse 0.6s ease-in-out infinite alternate;
+            }
+
+            .ml-auto {
+                margin-left: auto;
+            }
+
+            .time-track {
+                height: 4px;
+                background: var(--border2);
+                border-radius: 2px;
+                overflow: hidden;
+            }
+            .time-fill {
+                height: 100%;
+                border-radius: 2px;
+                transition:
+                    width 0.1s linear,
+                    background 0.4s;
+                background: var(--green);
+            }
+
+            .xp-track {
+                height: 2px;
+                background: var(--border2);
+                border-radius: 1px;
+                overflow: hidden;
+                margin-top: 2px;
+            }
+            .xp-fill {
+                height: 100%;
+                border-radius: 1px;
+                background: var(--purple);
+                transition: width 0.4s ease;
+            }
+            .xp-lbl {
+                font-size: 0.6rem;
+                color: var(--text3);
+                margin-top: 1px;
+                padding-bottom: 6px;
+            }
+
+            /* ── QUESTION AREA ───────────────────────── */
+            .game-body {
+                flex: 1;
+                width: 100%;
+                overflow-y: auto;
+                padding: 16px 20px 20px;
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+                max-width: 800px;
+                margin: 0 auto;
+                align-self: stretch;
+                /* allow body to be centered horizontally */
+            }
+            .game-body-wrap {
+                flex: 1;
+                width: 100%;
+                overflow-y: auto;
+                display: flex;
+                justify-content: center;
+            }
+
+            .q-meta {
+                display: flex;
+                gap: 8px;
+                align-items: center;
+                flex-wrap: wrap;
+            }
+            .tag {
+                padding: 3px 10px;
+                border-radius: 3px;
+                font-size: 0.68rem;
+                letter-spacing: 0.06em;
+                border: 1px solid;
+            }
+            .tag-mode {
+                border-color: rgba(176, 173, 255, 0.35);
+                color: var(--accent);
+                background: rgba(176, 173, 255, 0.06);
+            }
+            .tag-topic {
+                border-color: var(--border);
+                color: var(--text2);
+                background: transparent;
+            }
+            .q-num {
+                font-size: 0.68rem;
+                color: var(--text3);
+                margin-left: auto;
+            }
+
+            .question-card {
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: 4px;
+                padding: 22px 22px 18px;
+                position: relative;
+            }
+            .q-prompt {
+                font-size: 0.72rem;
+                color: var(--text3);
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                margin-bottom: 12px;
+            }
+
+            /* KaTeX display in question */
+            .eq-large {
+                font-size: clamp(1.1rem, 3vw, 1.6rem);
+                overflow-x: auto;
+            }
+            .eq-large .katex-display {
+                margin: 0;
+            }
+            .katex {
+                font-size: 1em !important;
+            }
+
+            .sym-question {
+                margin-top: 12px;
+                font-size: 0.88rem;
+                color: var(--text2);
+            }
+            .sym-question .sym-hl {
+                color: var(--accent);
+                font-weight: 700;
+                border-bottom: 2px solid var(--accent);
+                padding-bottom: 1px;
+            }
+
+            .scenario-hint {
+                margin-top: 10px;
+                font-size: 0.8rem;
+                color: var(--text3);
+                font-style: italic;
+            }
+
+            /* ── OPTIONS ─────────────────────────────── */
+            .options-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            @media (max-width: 520px) {
+                .options-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            .opt {
+                padding: 14px 16px;
+                border-radius: 4px;
+                border: 1px solid var(--border);
+                background: var(--surface);
+                color: var(--text);
+                font-size: 0.9rem;
+                font-family: inherit;
+                cursor: pointer;
+                text-align: left;
+                line-height: 1.5;
+                transition:
+                    border-color 0.12s,
+                    background 0.12s,
+                    transform 0.1s;
+                display: flex;
+                align-items: flex-start;
+                gap: 10px;
+                overflow: hidden;
+            }
+            .opt:hover:not(:disabled) {
+                border-color: var(--accent);
+                background: #1e1e2e;
+                transform: translateY(-1px);
+            }
+            .opt:active:not(:disabled) {
+                transform: none;
+            }
+            .opt:disabled {
+                cursor: default;
+            }
+            .opt.correct {
+                border-color: var(--green) !important;
+                background: rgba(76, 175, 110, 0.1) !important;
+                color: var(--green);
+            }
+            .opt.wrong {
+                border-color: var(--red) !important;
+                background: rgba(224, 82, 82, 0.08) !important;
+                color: var(--red);
+            }
+            .opt.picked {
+                border-color: var(--accent);
+                background: rgba(176, 173, 255, 0.1);
+            }
+
+            .opt-letter {
+                width: 22px;
+                height: 22px;
+                border-radius: 3px;
+                background: var(--border2);
+                color: var(--text3);
+                font-size: 0.72rem;
+                font-weight: 700;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+                margin-top: 1px;
+            }
+            .opt-body {
+                flex: 1;
+                overflow: hidden;
+            }
+            .opt-eq-name {
+                font-size: 0.68rem;
+                color: var(--text3);
+                margin-top: 4px;
+            }
+
+            /* KaTeX in options */
+            .opt .katex-display {
+                margin: 0;
+            }
+            .opt .katex {
+                font-size: 0.95em !important;
+            }
+
+            .submit-btn {
+                align-self: center;
+                padding: 11px 36px;
+                background: var(--accent);
+                color: #0c0c18;
+                border: none;
+                border-radius: 3px;
+                font-size: 0.9rem;
+                font-weight: 700;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+                cursor: pointer;
+                display: none;
+                transition: opacity 0.15s;
+            }
+            .submit-btn:hover {
+                opacity: 0.85;
+            }
+
+            /* ── GAME OVER SCREEN ────────────────────── */
+            .go-card {
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: 4px;
+                padding: 36px 32px;
+                max-width: 560px;
+                width: 100%;
+                text-align: center;
+            }
+            .go-title {
+                font-size: 2rem;
+                font-weight: 800;
+                color: var(--red);
+                margin-bottom: 4px;
+            }
+            .go-title.win {
+                color: var(--yellow);
+            }
+            .go-sub {
+                font-size: 0.85rem;
+                color: var(--text2);
+                margin-bottom: 24px;
+            }
+
+            .stats-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+                margin-bottom: 20px;
+            }
+            .stat {
+                background: var(--bg);
+                border: 1px solid var(--border2);
+                border-radius: 3px;
+                padding: 14px;
+            }
+            .stat-lbl {
+                font-size: 0.65rem;
+                color: var(--text3);
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                margin-bottom: 2px;
+            }
+            .stat-val {
+                font-size: 1.6rem;
+                font-weight: 800;
+                color: var(--text);
+            }
+
+            .new-record {
+                font-size: 0.75rem;
+                color: var(--yellow);
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                margin-bottom: 16px;
+                animation: blink 1s infinite;
+            }
+
+            .missed-section {
+                text-align: left;
+                margin-bottom: 20px;
+            }
+            .missed-lbl {
+                font-size: 0.68rem;
+                color: var(--text3);
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                margin-bottom: 10px;
+            }
+            .missed-item {
+                padding: 10px 14px;
+                border-radius: 3px;
+                background: var(--bg);
+                border: 1px solid var(--border);
+                margin-bottom: 8px;
+                font-size: 0.8rem;
+            }
+            .missed-item .mi-name {
+                font-weight: 600;
+                color: var(--text);
+                margin-bottom: 6px;
+            }
+            .missed-row {
+                display: flex;
+                gap: 8px;
+                align-items: flex-start;
+                margin-top: 4px;
+            }
+            .mi-label {
+                font-size: 0.65rem;
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                padding: 2px 6px;
+                border-radius: 2px;
+                flex-shrink: 0;
+                margin-top: 2px;
+            }
+            .mi-label.chosen {
+                background: rgba(224, 82, 82, 0.15);
+                border: 1px solid rgba(224, 82, 82, 0.3);
+                color: var(--red);
+            }
+            .mi-label.correct {
+                background: rgba(76, 175, 110, 0.12);
+                border: 1px solid rgba(76, 175, 110, 0.3);
+                color: var(--green);
+            }
+            .mi-label.timeout {
+                background: rgba(100, 100, 100, 0.15);
+                border: 1px solid var(--border);
+                color: var(--text3);
+            }
+            .mi-eq {
+                flex: 1;
+                overflow-x: auto;
+            }
+
+            .btn-row {
+                display: flex;
+                gap: 10px;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            /* ── RESPONSIVE ──────────────────────────── */
+            @media (max-width: 600px) {
+                .game-hud {
+                    gap: 10px;
+                }
+                .game-body {
+                    padding: 12px 14px 16px;
+                    gap: 10px;
+                }
+                .question-card {
+                    padding: 16px;
+                }
+                .options-grid {
+                    gap: 8px;
+                }
+                .opt {
+                    padding: 11px 12px;
+                }
+                .go-card {
+                    padding: 24px 18px;
+                }
+                .mode-grid {
+                    flex-direction: column;
+                    align-items: center;
+                }
+                .mode-card {
+                    max-width: 100%;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="bg"></canvas>
+        <canvas id="confetti"></canvas>
+        <div class="flash" id="flash"></div>
+        <div class="combo-pop" id="combo-pop"></div>
+        <div class="lvlup-overlay" id="lvlup-overlay">
+            <div class="lvlup-text" id="lvlup-text"></div>
+        </div>
+        <div class="feedback" id="feedback"></div>
+
+        <!-- ════════════════ START ════════════════ -->
+        <div class="screen active" id="start-screen">
+            <div class="wordmark">Physics<span>Match</span></div>
+
+            <div class="hs-row" id="hs-row"></div>
+
+            <div class="mode-grid">
+                <div
+                    class="mode-card selected"
+                    data-mode="symbol"
+                    onclick="selectMode('symbol')"
+                >
+                    <div class="mode-title">Symbol Match</div>
+                </div>
+                <div
+                    class="mode-card"
+                    data-mode="equation"
+                    onclick="selectMode('equation')"
+                >
+                    <div class="mode-title">Equation Match</div>
+                </div>
+                <div
+                    class="mode-card"
+                    data-mode="scenario"
+                    onclick="selectMode('scenario')"
+                >
+                    <div class="mode-title">Scenario Match</div>
+                </div>
+            </div>
+
+            <div class="filter-box">
+                <div class="filter-label">Practice Topics</div>
+                <div class="chips" id="chips"></div>
+            </div>
+
+            <button class="btn-primary" onclick="startGame()">PLAY</button>
+        </div>
+
+        <!-- ════════════════ GAME ════════════════ -->
+        <div class="screen" id="game-screen">
+            <div class="game-top">
+                <div class="game-hud">
+                    <div class="lives" id="lives"></div>
+                    <div class="hud-group">
+                        <div class="hud-lbl">Level</div>
+                        <div class="hud-val c-level" id="hud-level">1</div>
+                    </div>
+                    <div id="streak-wrap">
+                        <div class="streak-badge" id="streak-badge">×1</div>
+                    </div>
+                    <div class="hud-group ml-auto">
+                        <div class="hud-lbl">Score</div>
+                        <div class="hud-val c-score" id="hud-score">0</div>
+                    </div>
+                </div>
+                <div class="time-track">
+                    <div
+                        class="time-fill"
+                        id="time-fill"
+                        style="width: 100%"
+                    ></div>
+                </div>
+                <div class="xp-track">
+                    <div class="xp-fill" id="xp-fill" style="width: 0%"></div>
+                </div>
+                <div class="xp-lbl" id="xp-lbl">0 / 10 to next level</div>
+            </div>
+
+            <div class="game-body-wrap">
+                <div class="game-body" id="game-body">
+                    <div class="q-meta">
+                        <div class="tag tag-mode" id="tag-mode">—</div>
+                        <div class="tag tag-topic" id="tag-topic">—</div>
+                        <div class="q-num" id="q-num">Q1</div>
+                    </div>
+
+                    <div class="question-card">
+                        <div class="q-prompt" id="q-prompt"></div>
+                        <div id="q-content"></div>
+                    </div>
+
+                    <div class="options-grid" id="opts"></div>
+                    <button
+                        class="submit-btn"
+                        id="submit-btn"
+                        onclick="submitScenario()"
+                    >
+                        Submit Answer
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ════════════════ GAME OVER ════════════════ -->
+        <div class="screen" id="go-screen">
+            <div class="go-card">
+                <div class="go-title" id="go-title">GAME OVER</div>
+                <div class="go-sub" id="go-sub"></div>
+                <div class="stats-grid">
+                    <div class="stat">
+                        <div class="stat-lbl">Score</div>
+                        <div class="stat-val" id="go-score">0</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-lbl">Level</div>
+                        <div class="stat-val" id="go-level">1</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-lbl">Correct</div>
+                        <div class="stat-val" id="go-correct">0</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-lbl">Best Streak</div>
+                        <div class="stat-val" id="go-streak">0</div>
+                    </div>
+                </div>
+                <div class="new-record" id="new-record" style="display: none">
+                    ✦ NEW HIGH SCORE ✦
+                </div>
+                <div class="missed-section" id="missed"></div>
+                <div class="btn-row">
+                    <button class="btn-primary" onclick="startGame()">
+                        PLAY AGAIN
+                    </button>
+                    <button
+                        class="btn-ghost"
+                        onclick="showScreen('start-screen')"
+                    >
+                        MENU
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // ═══════════════════════════════════════════════════
+            //  EQUATION DATA — all latex strings use KaTeX syntax
+            // ═══════════════════════════════════════════════════
+            const EQ = [
+                // ── A.1 Kinematics ──────────────────────────────
+                {
+                    id: "sv1",
+                    name: "SUVAT – Final Velocity",
+                    topic: "A.1 Kinematics",
+                    tex: "v = u + at",
+                    syms: {
+                        v: "final velocity",
+                        u: "initial velocity",
+                        a: "acceleration",
+                        t: "time",
+                    },
+                    scenes: [
+                        "A car accelerates from rest – find its speed after 4 s",
+                        "How long does it take a ball to stop while decelerating?",
+                    ],
+                },
+
+                {
+                    id: "sv2",
+                    name: "SUVAT – Displacement (time)",
+                    topic: "A.1 Kinematics",
+                    tex: "s = ut + \\tfrac{1}{2}at^2",
+                    syms: {
+                        s: "displacement",
+                        u: "initial velocity",
+                        t: "time",
+                        a: "acceleration",
+                    },
+                    scenes: [
+                        "How far does a ball fall in 3 s?",
+                        "Height of a rocket 5 s after launch",
+                    ],
+                },
+
+                {
+                    id: "sv3",
+                    name: "SUVAT – Velocity-Displacement",
+                    topic: "A.1 Kinematics",
+                    tex: "v^2 = u^2 + 2as",
+                    syms: {
+                        v: "final velocity",
+                        u: "initial velocity",
+                        a: "acceleration",
+                        s: "displacement",
+                    },
+                    scenes: [
+                        "Speed just before impact when time is unknown",
+                        "Maximum height of a projectile (v = 0 at top)",
+                    ],
+                },
+
+                {
+                    id: "sv4",
+                    name: "SUVAT – Average Displacement",
+                    topic: "A.1 Kinematics",
+                    tex: "s = \\dfrac{v+u}{2}\\,t",
+                    syms: {
+                        s: "displacement",
+                        v: "final velocity",
+                        u: "initial velocity",
+                        t: "time",
+                    },
+                    scenes: ["Displacement of a uniformly decelerating train"],
+                },
+
+                // ── A.2 Forces ──────────────────────────────────
+                {
+                    id: "fs",
+                    name: "Static Friction",
+                    topic: "A.2 Forces",
+                    tex: "F_f \\leq \\mu_s F_N",
+                    syms: {
+                        F_f: "frictional force",
+                        "\\mu_s": "coefficient of static friction",
+                        F_N: "normal reaction force",
+                    },
+                    scenes: [
+                        "Will a box slide on a ramp?",
+                        "Maximum push before an object starts moving",
+                    ],
+                },
+
+                {
+                    id: "fd",
+                    name: "Dynamic Friction",
+                    topic: "A.2 Forces",
+                    tex: "F_f = \\mu_d F_N",
+                    syms: {
+                        F_f: "frictional force",
+                        "\\mu_d": "coefficient of dynamic friction",
+                        F_N: "normal reaction force",
+                    },
+                    scenes: [
+                        "Friction force on a sliding crate",
+                        "Deceleration of a book sliding on a table",
+                    ],
+                },
+
+                {
+                    id: "hooke",
+                    name: "Hooke's Law",
+                    topic: "A.2 Forces",
+                    tex: "F_H = -kx",
+                    syms: {
+                        F_H: "restoring force",
+                        k: "spring constant",
+                        x: "displacement from equilibrium",
+                    },
+                    scenes: [
+                        "Restoring force on a spring stretched 0.2 m",
+                        "Finding spring constant from force-extension data",
+                    ],
+                },
+
+                {
+                    id: "stokes",
+                    name: "Stokes' Law (Drag)",
+                    topic: "A.2 Forces",
+                    tex: "F_d = 6\\pi\\eta r v",
+                    syms: {
+                        F_d: "drag force",
+                        "\\eta": "viscosity of fluid",
+                        r: "radius of sphere",
+                        v: "speed relative to fluid",
+                    },
+                    scenes: [
+                        "Drag on a sphere falling through oil",
+                        "Terminal velocity in a viscous fluid",
+                    ],
+                },
+
+                {
+                    id: "buoy",
+                    name: "Buoyant Force",
+                    topic: "A.2 Forces",
+                    tex: "F_b = \\rho V g",
+                    syms: {
+                        F_b: "buoyant force",
+                        "\\rho": "density of displaced fluid",
+                        V: "volume of displaced fluid",
+                        g: "gravitational field strength",
+                    },
+                    scenes: [
+                        "Archimedes' principle – will it float?",
+                        "Upthrust on a submerged object",
+                    ],
+                },
+
+                {
+                    id: "wt",
+                    name: "Weight",
+                    topic: "A.2 Forces",
+                    tex: "F_g = mg",
+                    syms: {
+                        F_g: "gravitational force (weight)",
+                        m: "mass",
+                        g: "gravitational field strength",
+                    },
+                    scenes: [
+                        "Weight of an object on Earth",
+                        "Comparing weight on Moon vs Earth",
+                    ],
+                },
+
+                {
+                    id: "p",
+                    name: "Momentum",
+                    topic: "A.2 Forces",
+                    tex: "p = mv",
+                    syms: { p: "momentum", m: "mass", v: "velocity" },
+                    scenes: [
+                        "Momentum of a moving car",
+                        "Conservation of momentum in a collision",
+                    ],
+                },
+
+                {
+                    id: "J",
+                    name: "Impulse",
+                    topic: "A.2 Forces",
+                    tex: "J = F\\,\\Delta t",
+                    syms: {
+                        J: "impulse",
+                        F: "net force",
+                        "\\Delta t": "time interval",
+                    },
+                    scenes: [
+                        "Force during a short collision",
+                        "Why airbags reduce injury",
+                    ],
+                },
+
+                {
+                    id: "N2",
+                    name: "Newton's Second Law",
+                    topic: "A.2 Forces",
+                    tex: "F = ma = \\dfrac{\\Delta p}{\\Delta t}",
+                    syms: {
+                        F: "net force",
+                        m: "mass",
+                        a: "acceleration",
+                        "\\Delta p": "change in momentum",
+                        "\\Delta t": "time interval",
+                    },
+                    scenes: [
+                        "Acceleration from net force and mass",
+                        "Force needed to accelerate a 1000 kg car at 3 m s⁻²",
+                    ],
+                },
+
+                {
+                    id: "ac",
+                    name: "Centripetal Acceleration",
+                    topic: "A.2 Forces",
+                    tex: "a = \\dfrac{v^2}{r} = \\omega^2 r = \\dfrac{4\\pi^2 r}{T^2}",
+                    syms: {
+                        a: "centripetal acceleration",
+                        v: "speed",
+                        r: "radius",
+                        "\\omega": "angular speed",
+                        T: "period",
+                    },
+                    scenes: [
+                        "Acceleration of a car rounding a bend",
+                        "Centripetal acceleration of a satellite",
+                    ],
+                },
+
+                {
+                    id: "vt",
+                    name: "Tangential Velocity",
+                    topic: "A.2 Forces",
+                    tex: "v = \\dfrac{2\\pi r}{T} = \\omega r",
+                    syms: {
+                        v: "tangential velocity",
+                        r: "radius",
+                        T: "period",
+                        "\\omega": "angular velocity",
+                    },
+                    scenes: [
+                        "Speed of a point on the rim of a spinning disk",
+                        "Orbital speed of a satellite",
+                    ],
+                },
+
+                // ── A.3 Work, Energy, Power ─────────────────────
+                {
+                    id: "W",
+                    name: "Work Done",
+                    topic: "A.3 Work, Energy, Power",
+                    tex: "W = Fs\\cos\\theta",
+                    syms: {
+                        W: "work done",
+                        F: "force",
+                        s: "displacement",
+                        "\\theta": "angle between force and displacement",
+                    },
+                    scenes: [
+                        "Work done pushing a box at an angle",
+                        "Work done lifting a mass vertically",
+                    ],
+                },
+
+                {
+                    id: "Ek",
+                    name: "Kinetic Energy",
+                    topic: "A.3 Work, Energy, Power",
+                    tex: "E_K = \\tfrac{1}{2}mv^2 = \\dfrac{p^2}{2m}",
+                    syms: {
+                        E_K: "kinetic energy",
+                        m: "mass",
+                        v: "speed",
+                        p: "momentum",
+                    },
+                    scenes: [
+                        "KE of a moving ball",
+                        "Energy of a car at motorway speed",
+                    ],
+                },
+
+                {
+                    id: "Ep",
+                    name: "Gravitational Potential Energy",
+                    topic: "A.3 Work, Energy, Power",
+                    tex: "\\Delta E_p = mg\\Delta h",
+                    syms: {
+                        "\\Delta E_p": "change in gravitational PE",
+                        m: "mass",
+                        g: "gravitational field strength",
+                        "\\Delta h": "change in height",
+                    },
+                    scenes: [
+                        "Energy gained when lifting an object",
+                        "Energy released by a roller coaster descending a drop",
+                    ],
+                },
+
+                {
+                    id: "Es",
+                    name: "Elastic Potential Energy",
+                    topic: "A.3 Work, Energy, Power",
+                    tex: "E_H = \\tfrac{1}{2}k(\\Delta x)^2",
+                    syms: {
+                        E_H: "elastic potential energy",
+                        k: "spring constant",
+                        "\\Delta x": "compression or extension",
+                    },
+                    scenes: [
+                        "Energy stored in a compressed spring",
+                        "Energy in a stretched elastic band",
+                    ],
+                },
+
+                {
+                    id: "Pw",
+                    name: "Power",
+                    topic: "A.3 Work, Energy, Power",
+                    tex: "P = \\dfrac{\\Delta W}{t} = Fv",
+                    syms: {
+                        P: "power",
+                        "\\Delta W": "work done",
+                        t: "time",
+                        F: "force",
+                        v: "velocity",
+                    },
+                    scenes: [
+                        "Power of a motor lifting a mass",
+                        "Power output of a car engine at constant speed",
+                    ],
+                },
+
+                {
+                    id: "eff",
+                    name: "Efficiency",
+                    topic: "A.3 Work, Energy, Power",
+                    tex: "\\eta = \\dfrac{\\text{useful output}}{\\text{total input}}",
+                    syms: { "\\eta": "efficiency" },
+                    scenes: [
+                        "Efficiency of a machine that wastes heat",
+                        "What fraction of input energy becomes useful?",
+                    ],
+                },
+
+                // ── A.4 Rotational (HL) ─────────────────────────
+                {
+                    id: "tau",
+                    name: "Torque",
+                    topic: "A.4 Rotational (HL)",
+                    tex: "\\tau = Fr\\sin\\theta",
+                    syms: {
+                        "\\tau": "torque",
+                        F: "applied force",
+                        r: "radial distance",
+                        "\\theta": "angle between force and radius",
+                    },
+                    scenes: [
+                        "Torque from a spanner at an angle",
+                        "Turning effect on a lever",
+                    ],
+                },
+
+                {
+                    id: "I",
+                    name: "Moment of Inertia",
+                    topic: "A.4 Rotational (HL)",
+                    tex: "I = \\sum mr^2",
+                    syms: {
+                        I: "moment of inertia",
+                        m: "mass",
+                        r: "radial distance from axis",
+                    },
+                    scenes: [
+                        "Resistance to rotational acceleration",
+                        "Comparing spin-up of solid vs hollow cylinder",
+                    ],
+                },
+
+                {
+                    id: "N2r",
+                    name: "Newton's 2nd Law (Rotational)",
+                    topic: "A.4 Rotational (HL)",
+                    tex: "\\tau = I\\alpha",
+                    syms: {
+                        "\\tau": "net torque",
+                        I: "moment of inertia",
+                        "\\alpha": "angular acceleration",
+                    },
+                    scenes: [
+                        "Angular acceleration of a disk given torque",
+                        "Rotational analogue of F = ma",
+                    ],
+                },
+
+                {
+                    id: "L",
+                    name: "Angular Momentum",
+                    topic: "A.4 Rotational (HL)",
+                    tex: "L = I\\omega",
+                    syms: {
+                        L: "angular momentum",
+                        I: "moment of inertia",
+                        "\\omega": "angular velocity",
+                    },
+                    scenes: [
+                        "Conservation of angular momentum (spinning ice skater)",
+                        "Angular momentum of a rotating planet",
+                    ],
+                },
+
+                {
+                    id: "Ek_r",
+                    name: "Rotational Kinetic Energy",
+                    topic: "A.4 Rotational (HL)",
+                    tex: "E_k = \\tfrac{1}{2}I\\omega^2 = \\dfrac{L^2}{2I}",
+                    syms: {
+                        E_k: "rotational kinetic energy",
+                        I: "moment of inertia",
+                        "\\omega": "angular speed",
+                        L: "angular momentum",
+                    },
+                    scenes: [
+                        "KE of a spinning flywheel",
+                        "Rolling object: total KE = translational + rotational",
+                    ],
+                },
+
+                // ── A.5 Special Relativity (HL) ─────────────────
+                {
+                    id: "gam",
+                    name: "Lorentz Factor",
+                    topic: "A.5 Special Relativity (HL)",
+                    tex: "\\gamma = \\dfrac{1}{\\sqrt{1-v^2/c^2}}",
+                    syms: {
+                        "\\gamma": "Lorentz factor",
+                        v: "speed of object",
+                        c: "speed of light",
+                    },
+                    scenes: [
+                        "Time dilation at 0.9c",
+                        "Required for all relativistic calculations",
+                    ],
+                },
+
+                {
+                    id: "td",
+                    name: "Time Dilation",
+                    topic: "A.5 Special Relativity (HL)",
+                    tex: "\\Delta t = \\gamma\\,\\Delta t_0",
+                    syms: {
+                        "\\Delta t": "dilated time",
+                        "\\gamma": "Lorentz factor",
+                        "\\Delta t_0": "proper time",
+                    },
+                    scenes: [
+                        "How does time pass differently for a crew at 0.8c?",
+                        "Why do muons reach Earth?",
+                    ],
+                },
+
+                {
+                    id: "lc",
+                    name: "Length Contraction",
+                    topic: "A.5 Special Relativity (HL)",
+                    tex: "L = \\dfrac{L_0}{\\gamma}",
+                    syms: {
+                        L: "contracted length",
+                        L_0: "proper length",
+                        "\\gamma": "Lorentz factor",
+                    },
+                    scenes: [
+                        "Apparent length of a fast-moving spacecraft",
+                        "Length of a particle track at relativistic speed",
+                    ],
+                },
+
+                // ── B.1 Thermal ──────────────────────────────────
+                {
+                    id: "rho",
+                    name: "Density",
+                    topic: "B.1 Thermal Energy",
+                    tex: "\\rho = \\dfrac{m}{V}",
+                    syms: { "\\rho": "density", m: "mass", V: "volume" },
+                    scenes: [
+                        "Does an object float? (compare to water density)",
+                        "Mass of a known volume of iron",
+                    ],
+                },
+
+                {
+                    id: "Ek_av",
+                    name: "Average KE of Ideal Gas Molecule",
+                    topic: "B.1 Thermal Energy",
+                    tex: "\\bar{E}_k = \\tfrac{3}{2}k_B T",
+                    syms: {
+                        "\\bar{E}_k": "average kinetic energy per molecule",
+                        k_B: "Boltzmann's constant",
+                        T: "temperature in kelvin",
+                    },
+                    scenes: [
+                        "Average energy of gas molecules at room temperature",
+                        "Effect of temperature on molecular speed",
+                    ],
+                },
+
+                {
+                    id: "Qc",
+                    name: "Specific Heat Capacity",
+                    topic: "B.1 Thermal Energy",
+                    tex: "Q = mc\\Delta T",
+                    syms: {
+                        Q: "heat energy",
+                        m: "mass",
+                        c: "specific heat capacity",
+                        "\\Delta T": "temperature change",
+                    },
+                    scenes: [
+                        "Energy to heat 2 kg of water by 10 °C",
+                        "How much does 1 kg of iron warm when given 1000 J?",
+                    ],
+                },
+
+                {
+                    id: "Ql",
+                    name: "Latent Heat",
+                    topic: "B.1 Thermal Energy",
+                    tex: "Q = mL",
+                    syms: {
+                        Q: "heat energy",
+                        m: "mass",
+                        L: "specific latent heat",
+                    },
+                    scenes: [
+                        "Energy to melt 0.5 kg of ice",
+                        "Heat released when steam condenses",
+                    ],
+                },
+
+                {
+                    id: "SB",
+                    name: "Stefan–Boltzmann Law",
+                    topic: "B.1 Thermal Energy",
+                    tex: "L = \\sigma A T^4",
+                    syms: {
+                        L: "power radiated (luminosity)",
+                        "\\sigma": "Stefan–Boltzmann constant",
+                        A: "surface area",
+                        T: "temperature in kelvin",
+                    },
+                    scenes: [
+                        "Power emitted by a star of known radius and temperature",
+                        "Effect of doubling temperature on radiated power",
+                    ],
+                },
+
+                {
+                    id: "wien",
+                    name: "Wien's Law",
+                    topic: "B.1 Thermal Energy",
+                    tex: "\\lambda_{\\max}\\,T = 2.9\\times10^{-3}\\;\\text{m K}",
+                    syms: {
+                        "\\lambda_{\\max}": "peak wavelength",
+                        T: "temperature in kelvin",
+                    },
+                    scenes: [
+                        "Peak wavelength of the Sun's radiation",
+                        "Temperature of a star from its colour",
+                    ],
+                },
+
+                // ── B.3 Ideal Gas ────────────────────────────────
+                {
+                    id: "Pr",
+                    name: "Pressure",
+                    topic: "B.3 Ideal Gas",
+                    tex: "P = \\dfrac{F}{A}",
+                    syms: { P: "pressure", F: "force", A: "area" },
+                    scenes: [
+                        "Pressure of a block on a surface",
+                        "Why do snowshoes prevent sinking?",
+                    ],
+                },
+
+                {
+                    id: "IG",
+                    name: "Ideal Gas Law",
+                    topic: "B.3 Ideal Gas",
+                    tex: "PV = nRT = Nk_BT",
+                    syms: {
+                        P: "pressure",
+                        V: "volume",
+                        n: "amount in moles",
+                        R: "gas constant",
+                        T: "temperature in kelvin",
+                        N: "number of particles",
+                        k_B: "Boltzmann's constant",
+                    },
+                    scenes: [
+                        "Pressure after heating a sealed gas container",
+                        "Volume of a gas at different T and P",
+                        "Number of moles in a gas sample",
+                    ],
+                },
+
+                {
+                    id: "U",
+                    name: "Internal Energy (Ideal Gas)",
+                    topic: "B.3 Ideal Gas",
+                    tex: "U = \\tfrac{3}{2}nRT = \\tfrac{3}{2}Nk_BT",
+                    syms: {
+                        U: "internal energy",
+                        n: "moles",
+                        R: "gas constant",
+                        T: "temperature in kelvin",
+                        N: "number of particles",
+                        k_B: "Boltzmann's constant",
+                    },
+                    scenes: [
+                        "Total thermal energy in a gas sample",
+                        "Energy change when gas heated at constant volume",
+                    ],
+                },
+
+                // ── B.4 Thermodynamics (HL) ──────────────────────
+                {
+                    id: "1L",
+                    name: "First Law of Thermodynamics",
+                    topic: "B.4 Thermodynamics (HL)",
+                    tex: "Q = \\Delta U + W",
+                    syms: {
+                        Q: "heat added to system",
+                        "\\Delta U": "change in internal energy",
+                        W: "work done by gas",
+                    },
+                    scenes: [
+                        "Gas heated in a piston – how much work is done?",
+                        "Adiabatic expansion: Q = 0, so ΔU = −W",
+                    ],
+                },
+
+                {
+                    id: "Wg",
+                    name: "Work Done by a Gas",
+                    topic: "B.4 Thermodynamics (HL)",
+                    tex: "W = P\\Delta V",
+                    syms: {
+                        W: "work done by gas",
+                        P: "pressure",
+                        "\\Delta V": "change in volume",
+                    },
+                    scenes: [
+                        "Work during isothermal expansion",
+                        "Work in a gas piston when heated",
+                    ],
+                },
+
+                {
+                    id: "Car",
+                    name: "Carnot Efficiency",
+                    topic: "B.4 Thermodynamics (HL)",
+                    tex: "\\eta_{\\text{Carnot}} = 1 - \\dfrac{T_c}{T_h}",
+                    syms: {
+                        "\\eta_{\\text{Carnot}}": "Carnot efficiency",
+                        T_c: "cold reservoir temperature",
+                        T_h: "hot reservoir temperature",
+                    },
+                    scenes: [
+                        "Maximum efficiency of a heat engine",
+                        "Steam engine between 200 °C and 50 °C – max efficiency?",
+                    ],
+                },
+
+                // ── B.5 Circuits ─────────────────────────────────
+                {
+                    id: "I_",
+                    name: "Electric Current",
+                    topic: "B.5 Electric Circuits",
+                    tex: "I = \\dfrac{\\Delta q}{\\Delta t}",
+                    syms: {
+                        I: "electrical current",
+                        "\\Delta q": "charge",
+                        "\\Delta t": "time",
+                    },
+                    scenes: [
+                        "Current when 10 C flows in 2 s",
+                        "Charge delivered by 3 A in 1 min",
+                    ],
+                },
+
+                {
+                    id: "V_",
+                    name: "Potential Difference",
+                    topic: "B.5 Electric Circuits",
+                    tex: "V = \\dfrac{W}{q}",
+                    syms: {
+                        V: "potential difference",
+                        W: "work done",
+                        q: "charge",
+                    },
+                    scenes: [
+                        "Energy per unit charge given to electrons",
+                        "Work done moving charge through a p.d.",
+                    ],
+                },
+
+                {
+                    id: "R_",
+                    name: "Ohm's Law / Resistance",
+                    topic: "B.5 Electric Circuits",
+                    tex: "R = \\dfrac{V}{I}",
+                    syms: {
+                        R: "resistance",
+                        V: "potential difference",
+                        I: "current",
+                    },
+                    scenes: [
+                        "Resistance from voltage and current readings",
+                        "Current through 10 Ω with 5 V across it",
+                    ],
+                },
+
+                {
+                    id: "res",
+                    name: "Resistivity",
+                    topic: "B.5 Electric Circuits",
+                    tex: "\\rho = \\dfrac{RA}{l}",
+                    syms: {
+                        "\\rho": "resistivity",
+                        R: "resistance",
+                        A: "cross-sectional area",
+                        l: "length",
+                    },
+                    scenes: [
+                        "Resistance of a wire given its material and dimensions",
+                        "Thin vs thick wire resistance comparison",
+                    ],
+                },
+
+                {
+                    id: "Pe",
+                    name: "Electrical Power",
+                    topic: "B.5 Electric Circuits",
+                    tex: "P = IV = I^2 R = \\dfrac{V^2}{R}",
+                    syms: {
+                        P: "power",
+                        I: "current",
+                        V: "voltage",
+                        R: "resistance",
+                    },
+                    scenes: [
+                        "Power dissipated in a resistor",
+                        "Power rating of a light bulb",
+                        "Why do high-resistance wires get hot?",
+                    ],
+                },
+
+                {
+                    id: "emf",
+                    name: "EMF & Internal Resistance",
+                    topic: "B.5 Electric Circuits",
+                    tex: "\\varepsilon = I(R + r)",
+                    syms: {
+                        "\\varepsilon": "EMF (electromotive force)",
+                        I: "current",
+                        R: "external resistance",
+                        r: "internal resistance",
+                    },
+                    scenes: [
+                        "Terminal voltage of a battery under load",
+                        "Why does battery voltage drop when current is drawn?",
+                    ],
+                },
+
+                // ── C.1 SHM ──────────────────────────────────────
+                {
+                    id: "shm",
+                    name: "Defining Equation of SHM",
+                    topic: "C.1 Simple Harmonic Motion",
+                    tex: "a = -\\omega^2 x",
+                    syms: {
+                        a: "acceleration",
+                        "\\omega": "angular frequency",
+                        x: "displacement from equilibrium",
+                    },
+                    scenes: [
+                        "Acceleration at maximum displacement of a pendulum",
+                        "Identifying SHM from a = −ω²x",
+                    ],
+                },
+
+                {
+                    id: "Tf",
+                    name: "Period–Frequency Relation",
+                    topic: "C.1 Simple Harmonic Motion",
+                    tex: "T = \\dfrac{1}{f} = \\dfrac{2\\pi}{\\omega}",
+                    syms: {
+                        T: "period",
+                        f: "frequency",
+                        "\\omega": "angular frequency",
+                    },
+                    scenes: [
+                        "Period from frequency",
+                        "Converting between f and ω",
+                    ],
+                },
+
+                {
+                    id: "Tms",
+                    name: "Period of Mass–Spring System",
+                    topic: "C.1 Simple Harmonic Motion",
+                    tex: "T = 2\\pi\\sqrt{\\dfrac{m}{k}}",
+                    syms: { T: "period", m: "mass", k: "spring constant" },
+                    scenes: [
+                        "Period of a mass on a spring",
+                        "Effect of doubling the mass on the period",
+                    ],
+                },
+
+                {
+                    id: "Tp",
+                    name: "Period of a Pendulum",
+                    topic: "C.1 Simple Harmonic Motion",
+                    tex: "T = 2\\pi\\sqrt{\\dfrac{l}{g}}",
+                    syms: {
+                        T: "period",
+                        l: "pendulum length",
+                        g: "gravitational field strength",
+                    },
+                    scenes: [
+                        "Period of a 1 m pendulum on Earth",
+                        "Pendulum behaviour on the Moon",
+                    ],
+                },
+
+                // ── C.2 Waves ────────────────────────────────────
+                {
+                    id: "wv",
+                    name: "Wave Equation",
+                    topic: "C.2 Travelling Waves",
+                    tex: "v = f\\lambda = \\dfrac{\\lambda}{T}",
+                    syms: {
+                        v: "wave speed",
+                        f: "frequency",
+                        "\\lambda": "wavelength",
+                        T: "period",
+                    },
+                    scenes: [
+                        "Speed of a wave from f and λ",
+                        "Wavelength of 440 Hz sound in air",
+                    ],
+                },
+
+                // ── C.3 Refraction & Waves ───────────────────────
+                {
+                    id: "snell",
+                    name: "Snell's Law",
+                    topic: "C.3 Refraction & Waves",
+                    tex: "n_1\\sin\\theta_1 = n_2\\sin\\theta_2",
+                    syms: {
+                        n_1: "refractive index of medium 1",
+                        n_2: "refractive index of medium 2",
+                        "\\theta_1": "angle of incidence",
+                        "\\theta_2": "angle of refraction",
+                    },
+                    scenes: [
+                        "Angle of refraction entering glass from air",
+                        "Critical angle for total internal reflection",
+                    ],
+                },
+
+                {
+                    id: "2src",
+                    name: "Two-Source Interference",
+                    topic: "C.3 Refraction & Waves",
+                    tex: "s = \\dfrac{\\lambda D}{d}",
+                    syms: {
+                        s: "fringe spacing",
+                        "\\lambda": "wavelength",
+                        D: "distance to screen",
+                        d: "slit separation",
+                    },
+                    scenes: [
+                        "Fringe spacing in a double-slit experiment",
+                        "Wavelength from a fringe pattern measurement",
+                    ],
+                },
+
+                // ── C.5 Doppler ──────────────────────────────────
+                {
+                    id: "dop",
+                    name: "Doppler Effect (EM)",
+                    topic: "C.5 Doppler Effect",
+                    tex: "\\dfrac{\\Delta f}{f} \\approx \\dfrac{v}{c}",
+                    syms: {
+                        "\\Delta f": "frequency shift",
+                        f: "emitted frequency",
+                        v: "relative speed",
+                        c: "speed of light",
+                    },
+                    scenes: [
+                        "Redshift of a distant galaxy",
+                        "Speed of a star from spectral-line shift",
+                    ],
+                },
+
+                // ── D.1 Gravity ──────────────────────────────────
+                {
+                    id: "Fg",
+                    name: "Newton's Law of Gravitation",
+                    topic: "D.1 Gravitational Fields",
+                    tex: "F = \\dfrac{Gm_1 m_2}{r^2}",
+                    syms: {
+                        F: "gravitational force",
+                        G: "gravitational constant",
+                        m_1: "mass 1",
+                        m_2: "mass 2",
+                        r: "distance between centres",
+                    },
+                    scenes: [
+                        "Gravitational force between Earth and Moon",
+                        "Why gravity weakens with distance",
+                    ],
+                },
+
+                {
+                    id: "g_",
+                    name: "Gravitational Field Strength",
+                    topic: "D.1 Gravitational Fields",
+                    tex: "g = \\dfrac{F}{m} = \\dfrac{GM}{r^2}",
+                    syms: {
+                        g: "gravitational field strength",
+                        F: "gravitational force on test mass",
+                        m: "test mass",
+                        G: "gravitational constant",
+                        M: "source mass",
+                        r: "distance from centre",
+                    },
+                    scenes: [
+                        "Field strength at Mars surface",
+                        "How g varies with altitude",
+                    ],
+                },
+
+                {
+                    id: "vesc",
+                    name: "Escape Velocity",
+                    topic: "D.1 Gravitational Fields (HL)",
+                    tex: "v_{\\text{esc}} = \\sqrt{\\dfrac{2GM}{r}}",
+                    syms: {
+                        "v_{\\text{esc}}": "escape speed",
+                        G: "gravitational constant",
+                        M: "central mass",
+                        r: "distance from centre",
+                    },
+                    scenes: [
+                        "Escape velocity from Earth",
+                        "Black hole event horizon",
+                    ],
+                },
+
+                // ── D.2 EM Fields ────────────────────────────────
+                {
+                    id: "Fc",
+                    name: "Coulomb's Law",
+                    topic: "D.2 Electromagnetic Fields",
+                    tex: "F = \\dfrac{kq_1 q_2}{r^2}",
+                    syms: {
+                        F: "electrostatic force",
+                        k: "Coulomb's constant",
+                        q_1: "charge 1",
+                        q_2: "charge 2",
+                        r: "separation",
+                    },
+                    scenes: [
+                        "Force between two charged spheres",
+                        "Comparing gravitational and electrostatic forces",
+                    ],
+                },
+
+                {
+                    id: "Ef",
+                    name: "Electric Field Strength",
+                    topic: "D.2 Electromagnetic Fields",
+                    tex: "E = \\dfrac{F}{q}",
+                    syms: {
+                        E: "electric field strength",
+                        F: "electric force",
+                        q: "charge",
+                    },
+                    scenes: [
+                        "Force on a charge in a field",
+                        "Field between parallel plates",
+                    ],
+                },
+
+                {
+                    id: "Epl",
+                    name: "Uniform Field (Plates)",
+                    topic: "D.2 Electromagnetic Fields",
+                    tex: "E = \\dfrac{V}{d}",
+                    syms: {
+                        E: "electric field strength",
+                        V: "voltage across plates",
+                        d: "plate separation",
+                    },
+                    scenes: [
+                        "Field inside a capacitor",
+                        "Accelerating charges between plates",
+                    ],
+                },
+
+                // ── D.3 Motion in EM Fields ──────────────────────
+                {
+                    id: "Fqv",
+                    name: "Magnetic Force on Moving Charge",
+                    topic: "D.3 Electromagnetic Fields",
+                    tex: "F = qvB\\sin\\theta",
+                    syms: {
+                        F: "magnetic force",
+                        q: "charge",
+                        v: "velocity",
+                        B: "magnetic flux density",
+                        "\\theta": "angle between v and B",
+                    },
+                    scenes: [
+                        "Force on an electron in a magnetic field",
+                        "Why charged particles orbit in a magnetic field",
+                    ],
+                },
+
+                {
+                    id: "FBi",
+                    name: "Magnetic Force on Wire",
+                    topic: "D.3 Electromagnetic Fields",
+                    tex: "F = BIL\\sin\\theta",
+                    syms: {
+                        F: "magnetic force",
+                        B: "magnetic flux density",
+                        I: "current",
+                        L: "length in field",
+                        "\\theta": "angle between I and B",
+                    },
+                    scenes: [
+                        "Force on a loudspeaker coil",
+                        "Torque on a current loop",
+                    ],
+                },
+
+                // ── D.4 Induction (HL) ───────────────────────────
+                {
+                    id: "flux",
+                    name: "Magnetic Flux",
+                    topic: "D.4 EM Induction (HL)",
+                    tex: "\\Phi = BA\\cos\\theta",
+                    syms: {
+                        "\\Phi": "magnetic flux",
+                        B: "magnetic flux density",
+                        A: "area",
+                        "\\theta": "angle between normal and field",
+                    },
+                    scenes: [
+                        "Flux through a coil at an angle to a field",
+                        "Maximum flux when coil is perpendicular",
+                    ],
+                },
+
+                {
+                    id: "far",
+                    name: "Faraday's Law",
+                    topic: "D.4 EM Induction (HL)",
+                    tex: "\\varepsilon = -N\\dfrac{\\Delta\\Phi}{\\Delta t}",
+                    syms: {
+                        "\\varepsilon": "induced EMF",
+                        N: "number of turns",
+                        "\\Delta\\Phi": "change in magnetic flux",
+                        "\\Delta t": "time interval",
+                    },
+                    scenes: [
+                        "EMF induced in a rotating coil (generator)",
+                        "Transformer action from changing flux",
+                    ],
+                },
+
+                // ── E.1 Atomic ───────────────────────────────────
+                {
+                    id: "Eph",
+                    name: "Energy of a Photon",
+                    topic: "E.1 Atomic Structure",
+                    tex: "E = hf",
+                    syms: {
+                        E: "photon energy",
+                        h: "Planck's constant",
+                        f: "frequency",
+                    },
+                    scenes: [
+                        "Energy of a UV photon",
+                        "Frequency needed to ionise hydrogen",
+                    ],
+                },
+
+                // ── E.2 Quantum (HL) ─────────────────────────────
+                {
+                    id: "pe",
+                    name: "Photoelectric Effect",
+                    topic: "E.2 Quantum Physics (HL)",
+                    tex: "E_{\\max} = hf - \\Phi",
+                    syms: {
+                        "E_{\\max}": "max KE of photoelectron",
+                        h: "Planck's constant",
+                        f: "photon frequency",
+                        "\\Phi": "work function",
+                    },
+                    scenes: [
+                        "Max speed of electrons ejected by UV light",
+                        "Threshold frequency for photoelectric emission",
+                    ],
+                },
+
+                {
+                    id: "dB",
+                    name: "De Broglie Wavelength",
+                    topic: "E.2 Quantum Physics (HL)",
+                    tex: "\\lambda = \\dfrac{h}{p}",
+                    syms: {
+                        "\\lambda": "de Broglie wavelength",
+                        h: "Planck's constant",
+                        p: "momentum",
+                    },
+                    scenes: [
+                        "Wavelength of an electron in an electron microscope",
+                        "Wave–particle duality of matter",
+                    ],
+                },
+
+                // ── E.3 Radioactive Decay ────────────────────────
+                {
+                    id: "mc2",
+                    name: "Mass–Energy Equivalence",
+                    topic: "E.3 Radioactive Decay",
+                    tex: "E = mc^2",
+                    syms: { E: "energy", m: "mass", c: "speed of light" },
+                    scenes: [
+                        "Energy released in nuclear fission",
+                        "Mass defect in nuclear reactions",
+                        "Why nuclear energy is so powerful",
+                    ],
+                },
+
+                {
+                    id: "Nd",
+                    name: "Radioactive Decay Law",
+                    topic: "E.3 Radioactive Decay (HL)",
+                    tex: "N = N_0\\,e^{-\\lambda t}",
+                    syms: {
+                        N: "nuclei remaining at time t",
+                        N_0: "initial number of nuclei",
+                        "\\lambda": "decay constant",
+                        t: "time",
+                    },
+                    scenes: [
+                        "Atoms remaining after time t",
+                        "Carbon dating of a sample",
+                    ],
+                },
+
+                {
+                    id: "hl",
+                    name: "Half-Life",
+                    topic: "E.3 Radioactive Decay (HL)",
+                    tex: "T_{1/2} = \\dfrac{\\ln 2}{\\lambda}",
+                    syms: {
+                        "T_{1/2}": "half-life",
+                        "\\lambda": "decay constant",
+                    },
+                    scenes: [
+                        "Half-life from decay constant",
+                        "How long until activity falls to 1/8 of original?",
+                    ],
+                },
+            ];
+
+            // ═══════════════════════════════════════════════════
+            //  KaTeX render helpers
+            // ═══════════════════════════════════════════════════
+            function tex(str, block = false) {
+                try {
+                    return katex.renderToString(str, {
+                        displayMode: block,
+                        throwOnError: false,
+                    });
+                } catch (e) {
+                    return `<span style="color:var(--red)">${str}</span>`;
+                }
+            }
+            function texInline(str) {
+                return tex(str, false);
+            }
+            function texBlock(str) {
+                return tex(str, true);
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  BACKGROUND CANVAS (subtle dots)
+            // ═══════════════════════════════════════════════════
+            const bgC = document.getElementById("bg");
+            const bgX = bgC.getContext("2d");
+
+            function resizeBg() {
+                bgC.width = window.innerWidth;
+                bgC.height = window.innerHeight;
+                drawBg();
+            }
+            function drawBg() {
+                bgX.clearRect(0, 0, bgC.width, bgC.height);
+                // subtle grid dots
+                const sp = 40;
+                for (let x = sp / 2; x < bgC.width; x += sp)
+                    for (let y = sp / 2; y < bgC.height; y += sp) {
+                        bgX.beginPath();
+                        bgX.arc(x, y, 1, 0, Math.PI * 2);
+                        bgX.fillStyle = "rgba(255,255,255,0.05)";
+                        bgX.fill();
+                    }
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  CONFETTI
+            // ═══════════════════════════════════════════════════
+            const cfC = document.getElementById("confetti");
+            const cfX = cfC.getContext("2d");
+            let cfp = [];
+
+            function resizeCf() {
+                cfC.width = window.innerWidth;
+                cfC.height = window.innerHeight;
+            }
+
+            function burst(x, y, n = 40) {
+                const cols = [
+                    "#58a6ff",
+                    "#bc8cff",
+                    "#3fb950",
+                    "#d29922",
+                    "#f85149",
+                ];
+                for (let i = 0; i < n; i++) {
+                    const a = Math.random() * Math.PI * 2;
+                    const s = 3 + Math.random() * 7;
+                    cfp.push({
+                        x,
+                        y,
+                        vx: Math.cos(a) * s,
+                        vy: Math.sin(a) * s - 3,
+                        col: cols[Math.floor(Math.random() * cols.length)],
+                        life: 1,
+                        dec: 0.018 + Math.random() * 0.018,
+                        w: 4 + Math.random() * 5,
+                        h: 2 + Math.random() * 3,
+                        rot: Math.random() * Math.PI,
+                        rv: (Math.random() - 0.5) * 0.15,
+                    });
+                }
+            }
+
+            function animCf() {
+                cfX.clearRect(0, 0, cfC.width, cfC.height);
+                cfp = cfp.filter((p) => p.life > 0);
+                cfp.forEach((p) => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.25;
+                    p.rot += p.rv;
+                    p.life -= p.dec;
+                    cfX.save();
+                    cfX.translate(p.x, p.y);
+                    cfX.rotate(p.rot);
+                    cfX.globalAlpha = Math.max(0, p.life);
+                    cfX.fillStyle = p.col;
+                    cfX.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+                    cfX.restore();
+                });
+                requestAnimationFrame(animCf);
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  AUDIO
+            // ═══════════════════════════════════════════════════
+            let _ac = null;
+            function ac() {
+                if (!_ac)
+                    _ac = new (window.AudioContext ||
+                        window.webkitAudioContext)();
+                return _ac;
+            }
+
+            function snd(type) {
+                try {
+                    const c = ac(),
+                        now = c.currentTime;
+                    const osc = c.createOscillator(),
+                        g = c.createGain();
+                    osc.connect(g);
+                    g.connect(c.destination);
+                    switch (type) {
+                        case "ok":
+                            osc.type = "sine";
+                            osc.frequency.setValueAtTime(440, now);
+                            osc.frequency.linearRampToValueAtTime(
+                                880,
+                                now + 0.18,
+                            );
+                            g.gain.setValueAtTime(0.25, now);
+                            g.gain.linearRampToValueAtTime(0, now + 0.3);
+                            osc.start(now);
+                            osc.stop(now + 0.3);
+                            break;
+                        case "no":
+                            osc.type = "sawtooth";
+                            osc.frequency.setValueAtTime(280, now);
+                            osc.frequency.linearRampToValueAtTime(
+                                140,
+                                now + 0.22,
+                            );
+                            g.gain.setValueAtTime(0.18, now);
+                            g.gain.linearRampToValueAtTime(0, now + 0.28);
+                            osc.start(now);
+                            osc.stop(now + 0.28);
+                            break;
+                        case "lvl": {
+                            [523, 659, 784, 1047].forEach((f, i) => {
+                                const o = c.createOscillator(),
+                                    g2 = c.createGain();
+                                o.connect(g2);
+                                g2.connect(c.destination);
+                                o.type = "sine";
+                                o.frequency.setValueAtTime(f, now + i * 0.1);
+                                g2.gain.setValueAtTime(0.2, now + i * 0.1);
+                                g2.gain.linearRampToValueAtTime(
+                                    0,
+                                    now + i * 0.1 + 0.2,
+                                );
+                                o.start(now + i * 0.1);
+                                o.stop(now + i * 0.1 + 0.3);
+                            });
+                            break;
+                        }
+                        case "str":
+                            osc.type = "triangle";
+                            osc.frequency.setValueAtTime(600, now);
+                            osc.frequency.linearRampToValueAtTime(
+                                900,
+                                now + 0.12,
+                            );
+                            g.gain.setValueAtTime(0.2, now);
+                            g.gain.linearRampToValueAtTime(0, now + 0.2);
+                            osc.start(now);
+                            osc.stop(now + 0.2);
+                            break;
+                        case "tick":
+                            osc.type = "sine";
+                            osc.frequency.setValueAtTime(700, now);
+                            g.gain.setValueAtTime(0.04, now);
+                            g.gain.linearRampToValueAtTime(0, now + 0.05);
+                            osc.start(now);
+                            osc.stop(now + 0.05);
+                            break;
+                    }
+                } catch (e) {}
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  GAME STATE
+            // ═══════════════════════════════════════════════════
+            const HS_KEYS = {
+                symbol: "pb_hs_symbol",
+                equation: "pb_hs_equation",
+                scenario: "pb_hs_scenario",
+            };
+
+            const GS = {
+                mode: "symbol",
+                activeTopics: new Set(),
+                score: 0,
+                lives: 3,
+                level: 1,
+                streak: 0,
+                maxStreak: 0,
+                correctInLevel: 0,
+                totalCorrect: 0,
+                totalQ: 0,
+                missed: [],
+                running: false,
+                timeMax: 10,
+                timeLeft: 10,
+                timerId: null,
+                answered: false,
+                curEq: null,
+                scenarioPicked: new Set(),
+                correctScenarioId: null,
+                lastChosenTex: null,
+                lastChosenName: null,
+                symbolCorrectMeaning: null,
+            };
+
+            function getHS(mode) {
+                return parseInt(localStorage.getItem(HS_KEYS[mode]) || "0");
+            }
+            function setHS(mode, val) {
+                localStorage.setItem(HS_KEYS[mode], val);
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  TOPICS / CHIPS
+            // ═══════════════════════════════════════════════════
+            const TOPICS = [...new Set(EQ.map((e) => e.topic))];
+
+            const SL_TOPICS = new Set(
+                TOPICS.filter((t) => !t.includes("(HL)")),
+            );
+
+            function clearChipSelection(c) {
+                document
+                    .querySelectorAll(".chip")
+                    .forEach((x) => x.classList.remove("on"));
+                GS.activeTopics.clear();
+            }
+
+            function initChips() {
+                const c = document.getElementById("chips");
+                c.innerHTML = "";
+
+                // All Topics
+                const all = document.createElement("div");
+                all.className = "chip on";
+                all.textContent = "All Topics";
+                all.dataset.t = "ALL";
+                all.onclick = () => {
+                    clearChipSelection(c);
+                    all.classList.add("on");
+                };
+                c.appendChild(all);
+
+                // SL Only
+                const sl = document.createElement("div");
+                sl.className = "chip";
+                sl.textContent = "SL Only";
+                sl.dataset.t = "SL";
+                sl.onclick = () => {
+                    clearChipSelection(c);
+                    sl.classList.add("on");
+                    SL_TOPICS.forEach((t) => GS.activeTopics.add(t));
+                };
+                c.appendChild(sl);
+
+                TOPICS.forEach((t) => {
+                    const ch = document.createElement("div");
+                    ch.className = "chip";
+                    ch.textContent = t;
+                    ch.dataset.t = t;
+                    ch.onclick = () => {
+                        // deselect the preset chips
+                        c.querySelector('[data-t="ALL"]').classList.remove(
+                            "on",
+                        );
+                        c.querySelector('[data-t="SL"]').classList.remove("on");
+                        GS.activeTopics.has(t)
+                            ? (GS.activeTopics.delete(t),
+                              ch.classList.remove("on"))
+                            : (GS.activeTopics.add(t), ch.classList.add("on"));
+                        if (!GS.activeTopics.size)
+                            c.querySelector('[data-t="ALL"]').classList.add(
+                                "on",
+                            );
+                    };
+                    c.appendChild(ch);
+                });
+            }
+
+            function poolEqs() {
+                if (!GS.activeTopics.size) return EQ;
+                return EQ.filter((e) => GS.activeTopics.has(e.topic));
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  HIGH SCORE DISPLAY
+            // ═══════════════════════════════════════════════════‚‚‚
+            function renderHSRow() {
+                const r = document.getElementById("hs-row");
+                r.innerHTML = "";
+                ["symbol", "equation", "scenario"].forEach((m) => {
+                    const d = document.createElement("div");
+                    d.className = "hs-card";
+                    const labels = {
+                        symbol: "Symbol Match",
+                        equation: "Equation Match",
+                        scenario: "Scenario Match",
+                    };
+                    d.innerHTML = `<div class="hs-mode">${labels[m]}</div><div class="hs-val">${getHS(m).toLocaleString()}</div>`;
+                    r.appendChild(d);
+                });
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  SCREENS
+            // ═══════════════════════════════════════════════════
+            function showScreen(id) {
+                document
+                    .querySelectorAll(".screen")
+                    .forEach((s) => s.classList.remove("active"));
+                document.getElementById(id).classList.add("active");
+            }
+
+            function selectMode(m) {
+                GS.mode = m;
+                document
+                    .querySelectorAll(".mode-card")
+                    .forEach((c) =>
+                        c.classList.toggle("selected", c.dataset.mode === m),
+                    );
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  START
+            // ═══════════════════════════════════════════════════
+            function startGame() {
+                Object.assign(GS, {
+                    score: 0,
+                    lives: 3,
+                    level: 1,
+                    streak: 0,
+                    maxStreak: 0,
+                    correctInLevel: 0,
+                    totalCorrect: 0,
+                    totalQ: 0,
+                    missed: [],
+                    running: true,
+                    timeMax: 10,
+                    answered: false,
+                    scenarioPicked: new Set(),
+                    correctScenarioId: null,
+                    lastChosenTex: null,
+                    lastChosenName: null,
+                    symbolCorrectMeaning: null,
+                });
+                updateHUD();
+                showScreen("game-screen");
+                nextQ();
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  HUD
+            // ═══════════════════════════════════════════════════
+            function mult() {
+                if (GS.streak >= 10) return 10;
+                if (GS.streak >= 6) return 5;
+                if (GS.streak >= 3) return 2;
+                return 1;
+            }
+
+            function updateHUD() {
+                // lives
+                const lv = document.getElementById("lives");
+                lv.innerHTML = "";
+                for (let i = 0; i < 3; i++) {
+                    const h = document.createElement("div");
+                    h.className = "heart" + (i >= GS.lives ? " lost" : "");
+                    h.textContent = "♥";
+                    lv.appendChild(h);
+                }
+                document.getElementById("hud-score").textContent =
+                    GS.score.toLocaleString();
+                document.getElementById("hud-level").textContent = GS.level;
+                const sb = document.getElementById("streak-badge");
+                const m = mult();
+                sb.textContent = `×${m}`;
+                sb.className = "streak-badge" + (GS.streak >= 6 ? " fire" : "");
+                document.getElementById("xp-fill").style.width =
+                    (GS.correctInLevel / 10) * 100 + "%";
+                document.getElementById("xp-lbl").textContent =
+                    `${GS.correctInLevel}/10 to next level`;
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  QUESTIONS
+            // ═══════════════════════════════════════════════════
+            function nextQ() {
+                if (!GS.running) return;
+                stopTimer();
+                GS.answered = false;
+                GS.scenarioPicked = new Set();
+                document.getElementById("submit-btn").style.display = "none";
+
+                const pool = poolEqs();
+                if (pool.length < 4) {
+                    alert("Select topics with ≥4 equations.");
+                    showScreen("start-screen");
+                    return;
+                }
+
+                const eq = pool[Math.floor(Math.random() * pool.length)];
+                GS.curEq = eq;
+                GS.totalQ++;
+
+                document.getElementById("tag-topic").textContent = eq.topic;
+                document.getElementById("q-num").textContent = `Q${GS.totalQ}`;
+
+                if (GS.mode === "symbol") buildSymbol(eq, pool);
+                else if (GS.mode === "equation") buildEquation(eq, pool);
+                else buildScenario(eq, pool);
+
+                startTimer();
+            }
+
+            // ── Symbol Sprint ────────────────────────────────
+            function buildSymbol(eq, pool) {
+                document.getElementById("tag-mode").textContent =
+                    "Symbol Match";
+                const syms = Object.keys(eq.syms);
+                const sym = syms[Math.floor(Math.random() * syms.length)];
+                const correct = eq.syms[sym];
+
+                document.getElementById("q-prompt").textContent =
+                    "What does the highlighted symbol represent?";
+                document.getElementById("q-content").innerHTML =
+                    `<div class="eq-large">${texBlock(eq.tex)}</div>` +
+                    `<div class="sym-question">What is <span class="sym-hl">${texInline(sym)}</span> ?</div>`;
+
+                // distractors from all equations
+                const pool2 = [];
+                EQ.forEach((e) =>
+                    Object.values(e.syms).forEach((v) => {
+                        if (v !== correct && !pool2.includes(v)) pool2.push(v);
+                    }),
+                );
+                shuffle(pool2);
+                const opts = shuffle([correct, ...pool2.slice(0, 3)]);
+                // Store the correct meaning on GS so game-over can reference it
+                GS.symbolCorrectMeaning = correct;
+                // getChosenTex: unused for symbol mode (we show text), getChosenName: the text option chosen
+                buildOpts(
+                    opts,
+                    (o) => o === correct,
+                    (o) => `<span class="opt-body">${o}</span>`,
+                    "text",
+                    (o) => null,
+                    (o) => o,
+                );
+            }
+
+            // ── Equation Match ───────────────────────────────
+            function buildEquation(eq, pool) {
+                document.getElementById("tag-mode").textContent =
+                    "Equation Match";
+                document.getElementById("q-prompt").textContent =
+                    "Which equation matches this description?";
+                document.getElementById("q-content").innerHTML =
+                    `<div style="font-size:1.15rem;font-weight:700;color:var(--text)">${eq.name}</div>` +
+                    `<div style="font-size:.8rem;color:var(--text3);margin-top:4px">${eq.topic}</div>`;
+
+                const others = shuffle(
+                    pool.filter((e) => e.id !== eq.id),
+                ).slice(0, 3);
+                const opts = shuffle([eq, ...others]);
+                buildOpts(
+                    opts,
+                    (o) => o.id === eq.id,
+                    (o) => `<div class="opt-body">${texBlock(o.tex)}</div>`,
+                    "eq",
+                    (o) => o.tex,
+                    (o) => o.name,
+                );
+            }
+
+            // ── Scenario Blitz ───────────────────────────────
+            function buildScenario(eq, pool) {
+                document.getElementById("tag-mode").textContent =
+                    "Scenario Match";
+                GS.correctScenarioId = eq.id;
+                const scene =
+                    eq.scenes[Math.floor(Math.random() * eq.scenes.length)];
+
+                document.getElementById("q-prompt").textContent =
+                    "Which equation would you use?";
+                document.getElementById("q-content").innerHTML =
+                    `<div style="font-size:1.05rem;line-height:1.65;color:var(--text)">${scene}</div>` +
+                    `<div class="scenario-hint">Select all that apply, then hit Submit.</div>`;
+
+                const others = shuffle(
+                    pool.filter((e) => e.id !== eq.id),
+                ).slice(0, 3);
+                const opts = shuffle([eq, ...others]);
+                buildScenarioOpts(opts);
+                document.getElementById("submit-btn").style.display = "block";
+            }
+
+            // ── Build option buttons ─────────────────────────
+            const LETTERS = ["A", "B", "C", "D"];
+
+            function buildOpts(
+                opts,
+                isCorrect,
+                render,
+                style,
+                getChosenTex,
+                getChosenName,
+            ) {
+                const g = document.getElementById("opts");
+                g.innerHTML = "";
+                opts.forEach((o, i) => {
+                    const b = document.createElement("button");
+                    b.className = "opt";
+                    b.innerHTML = `<span class="opt-letter">${LETTERS[i]}</span>${render(o)}`;
+                    b.onclick = () =>
+                        pickOpt(
+                            b,
+                            isCorrect(o),
+                            () => {
+                                g.querySelectorAll(".opt").forEach((btn, j) => {
+                                    if (isCorrect(opts[j]))
+                                        btn.classList.add("correct");
+                                });
+                            },
+                            getChosenTex ? getChosenTex(o) : null,
+                            getChosenName ? getChosenName(o) : null,
+                        );
+                    g.appendChild(b);
+                });
+            }
+
+            function buildScenarioOpts(opts) {
+                const g = document.getElementById("opts");
+                g.innerHTML = "";
+                opts.forEach((eq, i) => {
+                    const b = document.createElement("button");
+                    b.className = "opt";
+                    b.dataset.id = eq.id;
+                    b.innerHTML =
+                        `<span class="opt-letter">${LETTERS[i]}</span>` +
+                        `<div class="opt-body">${texBlock(eq.tex)}<div class="opt-eq-name">${eq.name}</div></div>`;
+                    b.onclick = () => toggleScenarioOpt(b, eq.id);
+                    g.appendChild(b);
+                });
+            }
+
+            function toggleScenarioOpt(btn, id) {
+                if (GS.answered) return;
+                GS.scenarioPicked.has(id)
+                    ? (GS.scenarioPicked.delete(id),
+                      btn.classList.remove("picked"))
+                    : (GS.scenarioPicked.add(id), btn.classList.add("picked"));
+            }
+
+            function submitScenario() {
+                if (GS.answered) return;
+                GS.answered = true;
+                stopTimer();
+                const correct = GS.scenarioPicked.has(GS.correctScenarioId);
+                // record chosen: first picked id, or null if nothing picked
+                const pickedId = [...GS.scenarioPicked][0] || null;
+                if (pickedId) {
+                    const pickedEq = EQ.find((e) => e.id === pickedId);
+                    GS.lastChosenTex = pickedEq ? pickedEq.tex : null;
+                    GS.lastChosenName = pickedEq ? pickedEq.name : null;
+                } else {
+                    GS.lastChosenTex = null;
+                    GS.lastChosenName = null;
+                }
+                document.querySelectorAll("#opts .opt").forEach((btn) => {
+                    btn.disabled = true;
+                    if (btn.dataset.id === GS.correctScenarioId)
+                        btn.classList.add("correct");
+                    else if (GS.scenarioPicked.has(btn.dataset.id))
+                        btn.classList.add("wrong");
+                });
+                resolveResult(correct);
+            }
+
+            function pickOpt(
+                clickedBtn,
+                isCorrect,
+                revealFn,
+                chosenTex,
+                chosenName,
+            ) {
+                if (GS.answered) return;
+                GS.answered = true;
+                GS.lastChosenTex = chosenTex || null;
+                GS.lastChosenName = chosenName || null;
+                stopTimer();
+                document
+                    .querySelectorAll("#opts .opt")
+                    .forEach((b) => (b.disabled = true));
+                revealFn();
+                if (!isCorrect) clickedBtn.classList.add("wrong");
+                resolveResult(isCorrect);
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  RESULT
+            // ═══════════════════════════════════════════════════
+            function resolveResult(isCorrect) {
+                // timeLeft was preserved by stopTimer (which no longer zeroes it)
+                if (isCorrect) {
+                    GS.streak++;
+                    GS.correctInLevel++;
+                    GS.totalCorrect++;
+                    if (GS.streak > GS.maxStreak) GS.maxStreak = GS.streak;
+
+                    const m = mult();
+                    // score before incrementing streak multiplier — use time at moment of answer
+                    const tb = Math.max(0, GS.timeLeft / GS.timeMax);
+                    const pts = Math.max(10, Math.round(100 * tb * m));
+                    GS.score += pts;
+
+                    snd("ok");
+                    flash("rgba(63,185,80,.08)");
+                    showFeedback(`+${pts}`, "good");
+                    scorePop(`+${pts}`, "#3fb950");
+
+                    if (
+                        GS.streak === 3 ||
+                        GS.streak === 6 ||
+                        GS.streak === 10
+                    ) {
+                        comboShow();
+                        snd("str");
+                    }
+
+                    if (GS.correctInLevel >= 10) {
+                        GS.correctInLevel = 0;
+                        GS.level++;
+                        GS.timeMax = Math.max(4, 10 - (GS.level - 1) * 0.5);
+                        lvlUpFx();
+                        snd("lvl");
+                    }
+                } else {
+                    GS.streak = 0;
+                    GS.lives--;
+                    if (!GS.missed.find((x) => x.eq.id === GS.curEq.id)) {
+                        GS.missed.push({
+                            eq: GS.curEq,
+                            chosenTex: GS.lastChosenTex,
+                            chosenName: GS.lastChosenName,
+                            timedOut: false,
+                            mode: GS.mode,
+                            correctMeaning: GS.symbolCorrectMeaning,
+                        });
+                    }
+                    snd("no");
+                    flash("rgba(248,81,73,.1)");
+                    shakeScreen();
+                    showFeedback("Wrong — " + GS.curEq.name, "bad");
+                    if (GS.lives <= 0) {
+                        updateHUD();
+                        setTimeout(gameOver, 800);
+                        return;
+                    }
+                }
+                updateHUD();
+                setTimeout(
+                    () => {
+                        if (GS.running) nextQ();
+                    },
+                    isCorrect ? 550 : 900,
+                );
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  TIMER
+            // ═══════════════════════════════════════════════════
+            function startTimer() {
+                GS.timeLeft = GS.timeMax;
+                renderTimerBar();
+                GS.timerId = setInterval(() => {
+                    GS.timeLeft -= 0.1;
+                    renderTimerBar();
+                    if (
+                        GS.timeLeft <= 3 &&
+                        GS.timeLeft > 0 &&
+                        Math.floor(GS.timeLeft * 10) % 4 === 0
+                    )
+                        snd("tick");
+                    if (GS.timeLeft <= 0) {
+                        stopTimer();
+                        if (!GS.answered) timeout();
+                    }
+                }, 100);
+            }
+
+            function stopTimer() {
+                // preserve timeLeft so scoring can use it
+                if (GS.timerId) {
+                    clearInterval(GS.timerId);
+                    GS.timerId = null;
+                }
+            }
+
+            function renderTimerBar() {
+                const pct = Math.max(0, (GS.timeLeft / GS.timeMax) * 100);
+                const f = document.getElementById("time-fill");
+                f.style.width = pct + "%";
+                f.style.background =
+                    pct > 50
+                        ? "var(--green)"
+                        : pct > 25
+                          ? "var(--yellow)"
+                          : "var(--red)";
+            }
+
+            function timeout() {
+                GS.answered = true;
+                GS.timeLeft = 0;
+                document
+                    .querySelectorAll("#opts .opt")
+                    .forEach((b) => (b.disabled = true));
+                GS.streak = 0;
+                GS.lives--;
+                if (!GS.missed.find((x) => x.eq.id === GS.curEq.id)) {
+                    GS.missed.push({
+                        eq: GS.curEq,
+                        chosenTex: null,
+                        chosenName: null,
+                        timedOut: true,
+                        mode: GS.mode,
+                        correctMeaning: GS.symbolCorrectMeaning,
+                    });
+                }
+                snd("no");
+                flash("rgba(248,81,73,.1)");
+                shakeScreen();
+                showFeedback("Time's up — " + GS.curEq.name, "bad");
+                updateHUD();
+                if (GS.lives <= 0) {
+                    setTimeout(gameOver, 800);
+                    return;
+                }
+                setTimeout(() => {
+                    if (GS.running) nextQ();
+                }, 900);
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  EFFECTS
+            // ═══════════════════════════════════════════════════
+            function flash(col) {
+                const f = document.getElementById("flash");
+                f.style.background = col;
+                f.style.opacity = "1";
+                setTimeout(() => (f.style.opacity = "0"), 180);
+            }
+            function shakeScreen() {
+                const g = document.getElementById("game-screen");
+                g.classList.remove("shaking");
+                void g.offsetWidth;
+                g.classList.add("shaking");
+            }
+            function showFeedback(msg, type) {
+                const f = document.getElementById("feedback");
+                f.textContent = msg;
+                f.className = `feedback ${type} show`;
+                setTimeout(() => f.classList.remove("show"), 1800);
+            }
+            function scorePop(txt, col) {
+                const el = document.createElement("div");
+                el.className = "score-pop";
+                el.textContent = txt;
+                el.style.color = col;
+                el.style.left = window.innerWidth / 2 - 30 + "px";
+                el.style.top = window.innerHeight / 2 - 40 + "px";
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), 1000);
+            }
+            function comboShow() {
+                const m = mult();
+                const labels = {
+                    2: "Double!",
+                    5: "Combo ×5!",
+                    10: "Insane ×10!",
+                };
+                const cols = { 2: "#3fb950", 5: "#d29922", 10: "#db6d28" };
+                const p = document.getElementById("combo-pop");
+                p.textContent = (labels[m] || `×${m}`) + "  🔥";
+                p.style.color = cols[m] || "#58a6ff";
+                p.classList.add("show");
+                burst(window.innerWidth / 2, window.innerHeight / 2, 28);
+                setTimeout(() => p.classList.remove("show"), 1000);
+            }
+            function lvlUpFx() {
+                const o = document.getElementById("lvlup-overlay");
+                document.getElementById("lvlup-text").textContent =
+                    `Level ${GS.level}!`;
+                o.style.opacity = "1";
+                burst(window.innerWidth / 2, window.innerHeight / 3, 55);
+                setTimeout(() => (o.style.opacity = "0"), 1600);
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  GLOBAL XP / STREAK REPORTING
+            // ═══════════════════════════════════════════════════
+            function reportToGlobal(score) {
+                // XP
+                const xp =
+                    parseInt(localStorage.getItem("gfib_xp") || "0") + score;
+                localStorage.setItem("gfib_xp", xp);
+                // Daily streak
+                const today = new Date().toISOString().slice(0, 10);
+                const last = localStorage.getItem("gfib_streak_date") || "";
+                const yesterday = new Date(Date.now() - 86400000)
+                    .toISOString()
+                    .slice(0, 10);
+                let streak = parseInt(
+                    localStorage.getItem("gfib_streak_count") || "0",
+                );
+                if (last === today) {
+                    /* no change */
+                } else if (last === yesterday) {
+                    streak++;
+                } else {
+                    streak = 1;
+                }
+                localStorage.setItem("gfib_streak_date", today);
+                localStorage.setItem("gfib_streak_count", streak);
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  GAME OVER
+            // ═══════════════════════════════════════════════════
+            function gameOver() {
+                reportToGlobal(GS.score);
+                GS.running = false;
+                stopTimer();
+                const prev = getHS(GS.mode);
+                const isNew = GS.score > prev;
+                if (isNew) setHS(GS.mode, GS.score);
+
+                const acc =
+                    GS.totalQ > 0
+                        ? Math.round((GS.totalCorrect / GS.totalQ) * 100)
+                        : 0;
+                const t = document.getElementById("go-title");
+                const s = document.getElementById("go-sub");
+                if (acc >= 80) {
+                    t.textContent = "Excellent!";
+                    t.className = "go-title win";
+                    s.textContent = `${acc}% accuracy — physics master!`;
+                } else {
+                    t.textContent = "Game Over";
+                    t.className = "go-title";
+                    s.textContent = `${acc}% accuracy — keep drilling!`;
+                }
+
+                document.getElementById("go-score").textContent =
+                    GS.score.toLocaleString();
+                document.getElementById("go-level").textContent = GS.level;
+                document.getElementById("go-correct").textContent =
+                    GS.totalCorrect;
+                document.getElementById("go-streak").textContent = GS.maxStreak;
+                document.getElementById("new-record").style.display = isNew
+                    ? "block"
+                    : "none";
+
+                const ms = document.getElementById("missed");
+                ms.innerHTML = "";
+                if (GS.missed.length) {
+                    ms.innerHTML =
+                        '<div class="missed-lbl">Missed Questions</div>';
+                    GS.missed.slice(0, 6).forEach((m) => {
+                        const d = document.createElement("div");
+                        d.className = "missed-item";
+                        let html = `<div class="mi-name">${m.eq.name}</div>`;
+                        if (m.timedOut) {
+                            html += `<div class="missed-row"><span class="mi-label timeout">Timed out</span>`;
+                            html += `<span class="mi-eq">${texInline(m.eq.tex)}</span></div>`;
+                        } else if (m.mode === "symbol") {
+                            // show chosen meaning vs correct meaning (both plain text)
+                            if (m.chosenName)
+                                html += `<div class="missed-row"><span class="mi-label chosen">You chose</span><span class="mi-eq" style="color:var(--red)">${m.chosenName}</span></div>`;
+                            html += `<div class="missed-row"><span class="mi-label correct">Correct</span><span class="mi-eq" style="color:var(--green)">${m.correctMeaning}</span></div>`;
+                            html += `<div class="missed-row" style="margin-top:4px"><span style="font-size:.68rem;color:var(--text3)">in equation</span><span class="mi-eq" style="margin-left:8px">${texInline(m.eq.tex)}</span></div>`;
+                        } else {
+                            // equation match or scenario: show chosen equation vs correct equation
+                            if (m.chosenTex)
+                                html += `<div class="missed-row"><span class="mi-label chosen">You chose</span><span class="mi-eq">${texInline(m.chosenTex)}</span></div>`;
+                            html += `<div class="missed-row"><span class="mi-label correct">Correct</span><span class="mi-eq">${texInline(m.eq.tex)}</span></div>`;
+                        }
+                        d.innerHTML = html;
+                        ms.appendChild(d);
+                    });
+                }
+
+                if (isNew) {
+                    burst(window.innerWidth / 2, window.innerHeight / 4, 70);
+                }
+                renderHSRow();
+                showScreen("go-screen");
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  UTILS
+            // ═══════════════════════════════════════════════════
+            function shuffle(a) {
+                const r = [...a];
+                for (let i = r.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [r[i], r[j]] = [r[j], r[i]];
+                }
+                return r;
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  INIT (called after KaTeX loads)
+            // ═══════════════════════════════════════════════════
+            function initApp() {
+                resizeBg();
+                resizeCf();
+                initChips();
+                renderHSRow();
+                animCf();
+                window.addEventListener("resize", () => {
+                    resizeBg();
+                    resizeCf();
+                });
+            }
+        </script>
+    </body>
+</html>
