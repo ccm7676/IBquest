@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>gamefIB</title>
+        <title>GamefIB | Free IBDP Revision Games</title>
         <link rel="stylesheet" href="styles.css" />
         <style>
             /* ── HOME PAGE OVERRIDES & LAYOUT ─────────── */
@@ -97,16 +97,29 @@
                 color: var(--text3);
                 white-space: nowrap;
             }
-            .streak-display {
-                font-size: 1rem;
-                font-weight: 700;
-                color: var(--yellow);
+            .streak-col {
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: 4px;
+                padding: 10px 16px;
                 display: flex;
-                align-items: center;
-                gap: 4px;
-                white-space: nowrap;
+                flex-direction: column;
+                gap: 2px;
+                align-items: flex-start;
             }
-            .streak-display.inactive {
+            .streak-badge {
+                font-size: 2rem;
+                font-weight: 800;
+                color: var(--accent);
+                line-height: 1;
+            }
+            .streak-label {
+                font-size: 0.6rem;
+                color: var(--text3);
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+            }
+            .streak-col.inactive .streak-badge {
                 color: var(--text3);
             }
 
@@ -173,7 +186,8 @@
                 letter-spacing: 0;
             }
             .game-play-btn {
-                align-self: flex-start;
+                align-self: stretch;
+                text-align: center;
                 padding: 10px 28px;
                 font-size: 0.9rem;
                 font-weight: 700;
@@ -192,7 +206,6 @@
             }
             .game-play-btn:hover {
                 opacity: 0.9;
-                box-shadow: 0 0 16px rgba(176, 173, 255, 0.3);
             }
 
             /* ── COMING SOON CARD ─────────────────────── */
@@ -265,8 +278,9 @@
                         </div>
                         <div class="xp-text" id="xp-text">0 / 100 XP</div>
                     </div>
-                    <div class="streak-display" id="streak-display">
-                        🔥 <span id="streak-count">0</span>-day streak
+                    <div class="streak-col" id="streak-display">
+                        <div class="streak-badge" id="streak-count">0</div>
+                        <div class="streak-label">Streak</div>
                     </div>
                 </div>
             </div>
@@ -348,8 +362,8 @@
                     activeStreak;
                 streakEl.className =
                     activeStreak > 0
-                        ? "streak-display"
-                        : "streak-display inactive";
+                        ? "streak-col"
+                        : "streak-col inactive";
             }
 
             // ═══════════════════════════════════════════════════
@@ -377,11 +391,6 @@
     <div>
       <div class="game-card-title">Physics Match</div>
       <div class="game-card-desc">Master IB Physics equations</div>
-    </div>
-    <div class="game-hs-row">
-      <div class="game-hs-chip">Symbol<strong>${hs.symbol.toLocaleString()}</strong></div>
-      <div class="game-hs-chip">Equation<strong>${hs.equation.toLocaleString()}</strong></div>
-      <div class="game-hs-chip">Scenario<strong>${hs.scenario.toLocaleString()}</strong></div>
     </div>
     <a class="game-play-btn" href="games/PhysicsMatch.html">PLAY →</a>
   `;
