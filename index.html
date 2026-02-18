@@ -394,14 +394,17 @@
   `;
                 grid.appendChild(card);
 
-                // Coming soon placeholder
-                const soon = document.createElement("div");
-                soon.className = "coming-soon-card";
-                soon.innerHTML = `
-    <div class="coming-soon-title">???</div>
-    <span class="badge">Coming Soon</span>
+                // Device Detective card
+                const ddCard = document.createElement("div");
+                ddCard.className = "game-card";
+                ddCard.innerHTML = `
+    <div>
+      <div class="game-card-title">Device Detective</div>
+      <div class="game-card-desc">Identify literary devices in text</div>
+    </div>
+    <a class="game-play-btn" href="games/DeviceDetective.html">PLAY →</a>
   `;
-                grid.appendChild(soon);
+                grid.appendChild(ddCard);
             }
 
             // ═══════════════════════════════════════════════════
