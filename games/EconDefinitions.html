@@ -890,7 +890,7 @@
             correctInLevel: 0, totalCorrect: 0, totalQ: 0,
             missed: [],
             running: false,
-            timeMax: 10, timeLeft: 10, timerId: null, answered: false,
+            timeMax: 20, timeLeft: 20, timerId: null, answered: false,
             curDef: null, curGroup: null, lastChosenTerm: null,
         };
         function getHS(mode) { return parseInt(localStorage.getItem(HS_KEYS[mode]) || "0"); }
@@ -972,7 +972,7 @@
             Object.assign(GS, {
                 score:0, lives:3, level:1, streak:0, maxStreak:0,
                 correctInLevel:0, totalCorrect:0, totalQ:0,
-                missed:[], running:true, timeMax:10, answered:false,
+                missed:[], running:true, timeMax:20, answered:false,
                 curDef:null, curGroup:null, lastChosenTerm:null,
             });
             updateHUD();
@@ -1131,7 +1131,7 @@
                 if (GS.streak === 3 || GS.streak === 6 || GS.streak === 10) { comboShow(); snd("str"); }
                 if (GS.correctInLevel >= 10) {
                     GS.correctInLevel = 0; GS.level++;
-                    GS.timeMax = Math.max(4, 10 - (GS.level-1) * 0.5);
+                    GS.timeMax = Math.max(8, 20 - (GS.level-1) * 0.5);
                     lvlUpFx(); snd("lvl");
                 }
             } else {
