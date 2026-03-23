@@ -1,0 +1,1366 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Econ Definitions</title>
+        <link rel="stylesheet" href="../styles.css" />
+        <style>
+            /* ── START SCREEN ────────────────────────── */
+            #start-screen { gap: 20px; }
+
+            .wordmark {
+                font-size: clamp(2.6rem, 8vw, 4rem);
+                font-weight: 800;
+                letter-spacing: -1px;
+                color: var(--text);
+            }
+            .wordmark span { color: var(--accent); }
+
+            .back-btn {
+                position: absolute;
+                top: 20px; left: 20px;
+                font-size: 1.2rem;
+                color: white;
+                text-decoration: none;
+                z-index: 100;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                font-weight: 600;
+                transition: opacity 0.15s;
+            }
+            .back-btn:hover { opacity: 0.7; }
+
+            .hs-row {
+                display: flex; gap: 12px;
+                flex-wrap: wrap; justify-content: center;
+            }
+            .hs-card {
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: 4px;
+                padding: 10px 18px;
+                text-align: center;
+                min-width: 130px;
+            }
+            .hs-card .hs-mode {
+                font-size: 0.68rem;
+                color: var(--text3);
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                margin-bottom: 2px;
+            }
+            .hs-card .hs-val {
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: var(--accent);
+            }
+
+            .mode-grid {
+                display: flex; gap: 12px;
+                flex-wrap: wrap; justify-content: center;
+                max-width: 700px; width: 100%;
+            }
+            .mode-card {
+                flex: 1; min-width: 150px; max-width: 220px;
+                background: var(--surface);
+                border: 2px solid var(--border);
+                border-radius: 4px;
+                padding: 16px 18px;
+                cursor: pointer;
+                transition: border-color 0.15s, background 0.15s;
+                text-align: center;
+            }
+            .mode-card:hover { border-color: var(--text3); background: #202020; }
+            .mode-card.selected { border-color: var(--accent); background: #1e1e2e; }
+            .mode-title { font-size: 0.95rem; font-weight: 600; color: var(--text); }
+            .mode-desc { font-size: 0.72rem; color: var(--text3); margin-top: 4px; }
+
+            .filter-box {
+                max-width: 700px; width: 100%;
+                max-height: 30vh; overflow-y: auto;
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: 4px;
+                padding: 14px 18px;
+            }
+            .filter-label {
+                font-size: 0.68rem; color: var(--text3);
+                text-transform: uppercase; letter-spacing: 0.1em;
+                margin-bottom: 10px;
+            }
+            .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+            .chip {
+                padding: 5px 12px; border-radius: 3px;
+                border: 1px solid var(--border);
+                background: transparent;
+                font-size: 0.74rem; cursor: pointer;
+                color: var(--text2); transition: all 0.15s;
+            }
+            .chip:hover { border-color: var(--text2); color: var(--text); }
+            .chip.on {
+                background: rgba(176,173,255,0.12);
+                border-color: var(--accent); color: var(--accent);
+            }
+
+            /* ── GAME SCREEN ─────────────────────────── */
+            #game-screen { padding: 0; justify-content: flex-start; overflow: hidden; }
+
+            .game-top {
+                width: 100%; flex-shrink: 0;
+                background: var(--surface);
+                border-bottom: 1px solid var(--border);
+                padding: 10px 20px 0;
+                display: flex; flex-direction: column; gap: 6px;
+                position: relative; z-index: 20;
+            }
+            .game-hud {
+                display: flex; align-items: center;
+                gap: 14px; flex-wrap: wrap;
+            }
+            .lives { display: flex; gap: 5px; }
+            .heart { font-size: 1.2rem; transition: opacity 0.3s; }
+            .heart.lost { opacity: 0.2; }
+
+            .hud-group { display: flex; flex-direction: column; align-items: center; }
+            .hud-lbl { font-size: 0.6rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; }
+            .hud-val { font-size: 1.2rem; font-weight: 700; }
+            .hud-val.c-score { color: var(--accent); }
+            .hud-val.c-level { color: var(--text2); }
+
+            .streak-badge {
+                padding: 3px 12px; border-radius: 3px;
+                font-size: 0.82rem; font-weight: 700;
+                border: 1px solid var(--yellow);
+                color: var(--yellow);
+                background: rgba(201,146,42,0.08);
+            }
+            .streak-badge.fire {
+                border-color: var(--orange); color: var(--orange);
+                background: rgba(219,109,40,0.12);
+                animation: fpulse 0.6s ease-in-out infinite alternate;
+            }
+            .ml-auto { margin-left: auto; }
+
+            .time-track { height: 4px; background: var(--border2); border-radius: 2px; overflow: hidden; }
+            .time-fill {
+                height: 100%; border-radius: 2px;
+                transition: width 0.1s linear, background 0.4s;
+                background: var(--green);
+            }
+            .xp-track { height: 2px; background: var(--border2); border-radius: 1px; overflow: hidden; margin-top: 2px; }
+            .xp-fill { height: 100%; border-radius: 1px; background: var(--purple); transition: width 0.4s ease; }
+            .xp-lbl { font-size: 0.6rem; color: var(--text3); margin-top: 1px; padding-bottom: 6px; }
+
+            /* ── QUESTION AREA ───────────────────────── */
+            .game-body {
+                flex: 1; width: 100%; overflow-y: auto;
+                padding: 16px 20px 20px;
+                display: flex; flex-direction: column; gap: 14px;
+                max-width: 800px; margin: 0 auto; align-self: stretch;
+            }
+            .game-body-wrap {
+                flex: 1; width: 100%; overflow-y: auto;
+                display: flex; justify-content: center;
+            }
+
+            .q-meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+            .tag {
+                padding: 3px 10px; border-radius: 3px;
+                font-size: 0.68rem; letter-spacing: 0.06em; border: 1px solid;
+            }
+            .tag-mode { border-color: rgba(176,173,255,0.35); color: var(--accent); background: rgba(176,173,255,0.06); }
+            .tag-topic { border-color: var(--border); color: var(--text2); background: transparent; }
+            .q-num { font-size: 0.68rem; color: var(--text3); margin-left: auto; }
+
+            .question-card {
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: 4px;
+                padding: 22px 22px 18px;
+                position: relative;
+            }
+            .q-prompt {
+                font-size: 0.72rem; color: var(--text3);
+                text-transform: uppercase; letter-spacing: 0.1em;
+                margin-bottom: 12px;
+            }
+
+            /* Econ-specific question styles */
+            .def-text { font-size: 0.95rem; line-height: 1.7; color: var(--text); }
+            .def-term { font-size: 1.4rem; font-weight: 700; color: var(--text); line-height: 1.3; }
+            .def-topic { font-size: 0.7rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 6px; }
+            .cat-group-label { font-size: 1.2rem; font-weight: 700; color: var(--accent); margin-bottom: 8px; }
+
+            /* ── OPTIONS ─────────────────────────────── */
+            .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+            @media (max-width: 520px) { .options-grid { grid-template-columns: 1fr; } }
+
+            .opt {
+                padding: 14px 16px; border-radius: 4px;
+                border: 1px solid var(--border);
+                background: var(--surface); color: var(--text);
+                font-size: 0.9rem; font-family: inherit;
+                cursor: pointer; text-align: left; line-height: 1.5;
+                transition: border-color 0.12s, background 0.12s, transform 0.1s;
+                display: flex; align-items: flex-start; gap: 10px; overflow: hidden;
+            }
+            .opt:hover:not(:disabled) { border-color: var(--accent); background: #1e1e2e; transform: translateY(-1px); }
+            .opt:active:not(:disabled) { transform: none; }
+            .opt:disabled { cursor: default; }
+            .opt.correct { border-color: var(--green) !important; background: rgba(76,175,110,0.1) !important; color: var(--green); }
+            .opt.wrong { border-color: var(--red) !important; background: rgba(224,82,82,0.08) !important; color: var(--red); }
+
+            .opt-letter {
+                width: 22px; height: 22px; border-radius: 3px;
+                background: var(--border2); color: var(--text3);
+                font-size: 0.72rem; font-weight: 700;
+                display: inline-flex; align-items: center; justify-content: center;
+                flex-shrink: 0; margin-top: 1px;
+            }
+            .opt-body { flex: 1; overflow: hidden; white-space: normal; font-size: 0.88rem; line-height: 1.5; }
+
+            /* ── GAME OVER SCREEN ────────────────────── */
+            .go-card {
+                background: var(--surface); border: 1px solid var(--border);
+                border-radius: 4px; padding: 36px 32px;
+                max-width: 560px; width: 100%; text-align: center;
+            }
+            .go-title { font-size: 2rem; font-weight: 800; color: var(--red); margin-bottom: 4px; }
+            .go-title.win { color: var(--yellow); }
+            .go-sub { font-size: 0.85rem; color: var(--text2); margin-bottom: 24px; }
+
+            .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+            .stat { background: var(--bg); border: 1px solid var(--border2); border-radius: 3px; padding: 14px; }
+            .stat-lbl { font-size: 0.65rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 2px; }
+            .stat-val { font-size: 1.6rem; font-weight: 800; color: var(--text); }
+
+            .new-record {
+                font-size: 0.75rem; color: var(--yellow);
+                letter-spacing: 0.1em; text-transform: uppercase;
+                margin-bottom: 16px; animation: blink 1s infinite;
+            }
+
+            .missed-section { text-align: left; margin-bottom: 20px; }
+            .missed-lbl { font-size: 0.68rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; }
+            .missed-item {
+                padding: 10px 14px; border-radius: 3px;
+                background: var(--bg); border: 1px solid var(--border);
+                margin-bottom: 8px; font-size: 0.8rem;
+            }
+            .missed-item .mi-name { font-weight: 600; color: var(--text); margin-bottom: 6px; }
+            .missed-row { display: flex; gap: 8px; align-items: flex-start; margin-top: 4px; }
+            .mi-label {
+                font-size: 0.65rem; text-transform: uppercase;
+                letter-spacing: 0.08em; padding: 2px 6px;
+                border-radius: 2px; flex-shrink: 0; margin-top: 2px;
+            }
+            .mi-label.chosen { background: rgba(224,82,82,0.15); border: 1px solid rgba(224,82,82,0.3); color: var(--red); }
+            .mi-label.correct { background: rgba(76,175,110,0.12); border: 1px solid rgba(76,175,110,0.3); color: var(--green); }
+            .mi-label.timeout { background: rgba(100,100,100,0.15); border: 1px solid var(--border); color: var(--text3); }
+            .mi-text { flex: 1; overflow-wrap: break-word; word-break: break-word; }
+
+            .btn-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+            /* ── RESPONSIVE ──────────────────────────── */
+            @media (max-width: 600px) {
+                .game-hud { gap: 10px; }
+                .game-body { padding: 12px 14px 16px; gap: 10px; }
+                .question-card { padding: 16px; }
+                .options-grid { gap: 8px; }
+                .opt { padding: 11px 12px; }
+                .go-card { padding: 24px 18px; }
+                .mode-grid { flex-direction: column; align-items: stretch; width: 100%; max-width: 700px; }
+                .mode-card { width: 100%; flex: none; min-width: auto; max-width: none; }
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="bg"></canvas>
+        <canvas id="confetti"></canvas>
+        <div class="flash" id="flash"></div>
+        <div class="combo-pop" id="combo-pop"></div>
+        <div class="lvlup-overlay" id="lvlup-overlay">
+            <div class="lvlup-text" id="lvlup-text"></div>
+        </div>
+        <div class="feedback" id="feedback"></div>
+
+        <!-- ════════════════ START ════════════════ -->
+        <div class="screen active" id="start-screen">
+            <a href="../index.html" class="back-btn">← Back</a>
+            <div class="wordmark">Econ<span>Definitions</span></div>
+            <div class="hs-row" id="hs-row"></div>
+            <div class="mode-grid">
+                <div class="mode-card selected" data-mode="term" onclick="selectMode('term')">
+                    <div class="mode-title">Term Match</div>
+                    <div class="mode-desc">Definition → pick term</div>
+                </div>
+                <div class="mode-card" data-mode="definition" onclick="selectMode('definition')">
+                    <div class="mode-title">Definition Match</div>
+                    <div class="mode-desc">Term → pick definition</div>
+                </div>
+                <div class="mode-card" data-mode="category" onclick="selectMode('category')">
+                    <div class="mode-title">Category Match</div>
+                    <div class="mode-desc">Group → pick the term</div>
+                </div>
+            </div>
+            <div class="filter-box">
+                <div class="filter-label">Practice Topics</div>
+                <div class="chips" id="chips"></div>
+            </div>
+            <button class="btn-primary" onclick="startGame()">PLAY</button>
+        </div>
+
+        <!-- ════════════════ GAME ════════════════ -->
+        <div class="screen" id="game-screen">
+            <div class="game-top">
+                <div class="game-hud">
+                    <div class="lives" id="lives"></div>
+                    <div class="hud-group">
+                        <div class="hud-lbl">Level</div>
+                        <div class="hud-val c-level" id="hud-level">1</div>
+                    </div>
+                    <div id="streak-wrap">
+                        <div class="streak-badge" id="streak-badge">×1</div>
+                    </div>
+                    <div class="hud-group ml-auto">
+                        <div class="hud-lbl">Score</div>
+                        <div class="hud-val c-score" id="hud-score">0</div>
+                    </div>
+                </div>
+                <div class="time-track">
+                    <div class="time-fill" id="time-fill" style="width:100%"></div>
+                </div>
+                <div class="xp-track">
+                    <div class="xp-fill" id="xp-fill" style="width:0%"></div>
+                </div>
+                <div class="xp-lbl" id="xp-lbl">0 / 10 to next level</div>
+            </div>
+            <div class="game-body-wrap">
+                <div class="game-body" id="game-body">
+                    <div class="q-meta">
+                        <div class="tag tag-mode" id="tag-mode">—</div>
+                        <div class="tag tag-topic" id="tag-topic">—</div>
+                        <div class="q-num" id="q-num">Q1</div>
+                    </div>
+                    <div class="question-card">
+                        <div class="q-prompt" id="q-prompt"></div>
+                        <div id="q-content"></div>
+                    </div>
+                    <div class="options-grid" id="opts"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ════════════════ GAME OVER ════════════════ -->
+        <div class="screen" id="go-screen">
+            <div class="go-card">
+                <div class="go-title" id="go-title">GAME OVER</div>
+                <div class="go-sub" id="go-sub"></div>
+                <div class="stats-grid">
+                    <div class="stat"><div class="stat-lbl">Score</div><div class="stat-val" id="go-score">0</div></div>
+                    <div class="stat"><div class="stat-lbl">Level</div><div class="stat-val" id="go-level">1</div></div>
+                    <div class="stat"><div class="stat-lbl">Correct</div><div class="stat-val" id="go-correct">0</div></div>
+                    <div class="stat"><div class="stat-lbl">Best Streak</div><div class="stat-val" id="go-streak">0</div></div>
+                </div>
+                <div class="new-record" id="new-record" style="display:none">✦ NEW HIGH SCORE ✦</div>
+                <div class="missed-section" id="missed"></div>
+                <div class="btn-row">
+                    <button class="btn-primary" onclick="startGame()">PLAY AGAIN</button>
+                    <button class="btn-ghost" onclick="showScreen('start-screen')">MENU</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+        // ═══════════════════════════════════════════════════
+        //  DEFINITIONS DATA
+        // ═══════════════════════════════════════════════════
+        const DEFS = [
+// ── A ───────────────────────────────────────────────────────────────
+{ id:"absolute_advantage", term:"Absolute Advantage", def:"A country is able to produce more output than other countries using the same input of factors of production.", topic:"International", group:null },
+{ id:"absolute_poverty", term:"Absolute Poverty", def:"Having insufficient income to meet basic human needs, measured at less than US$2.15 (PPP) a day.", topic:"Development", group:null },
+{ id:"actual_growth", term:"Actual Growth", def:"An increase in real output for an economy over time. It is measured as an increase in real GDP.", topic:"Macroeconomics", group:null },
+{ id:"adverse_selection", term:"Adverse Selection", def:"Occurs when a buyer and seller do not have the same information, causing a transaction to take place based upon uneven terms.", topic:"Microeconomics", group:"behavioral_biases" },
+{ id:"aggregate_demand", term:"Aggregate Demand", def:"The total spending in an economy consisting of consumption, investment, government expenditure and net exports.", topic:"Macroeconomics", group:null },
+{ id:"official_aid", term:"Official Aid", def:"Aid provided to a country by another government or governmental organization such as the UN or EU.", topic:"Development", group:"types_aid" },
+{ id:"tied_aid", term:"Tied Aid", def:"Aid granted on the condition that it is used to buy goods or services from the donor country.", topic:"Development", group:"types_aid" },
+{ id:"allocative_efficiency", term:"Allocative Efficiency", def:"Exists where price is equal to marginal cost (or marginal social cost) and resources are allocated in such a way that neither too much nor too little is produced from society's point of view.", topic:"Microeconomics", group:null },
+{ id:"allocative_inefficiency", term:"Allocative Inefficiency", def:"Occurs where the marginal social cost of producing a good is not equal to the marginal social benefit of the good to society — i.e. where marginal cost (including external costs) is not equal to the price charged to consumers.", topic:"Microeconomics", group:null },
+{ id:"anti_monopoly_regulation", term:"Anti-Monopoly Regulation", def:"Policies intended to regulate the market share of an individual company in order to enforce competition.", topic:"Microeconomics", group:"government_intervention" },
+{ id:"anti_dumping", term:"Anti-Dumping", def:"Government legislation (the imposition of a tariff) against the selling of imported goods at a price below their production costs.", topic:"International", group:null },
+{ id:"appreciation", term:"Appreciation", def:"An increase in the value of a currency, expressed in terms of another currency, in a floating exchange rate system as a result of market forces.", topic:"International", group:null },
+{ id:"asymmetric_information", term:"Asymmetric Information", def:"A situation where one party in an economic transaction has access to more or better information than the other party.", topic:"Microeconomics", group:null },
+{ id:"automatic_stabilizers", term:"Automatic Stabilizers", def:"Features of government fiscal policy (for example, unemployment benefits and direct tax revenues) that automatically counter-balance fluctuations in economic activity. Government spending on unemployment benefits automatically rises and direct tax revenues automatically fall when economic activity is slow.", topic:"Macroeconomics", group:null },
+{ id:"average_costs", term:"Average Costs", def:"Total cost divided by the quantity produced.", topic:"Microeconomics", group:null },
+{ id:"average_tax_rate", term:"Average Tax Rate", def:"The proportion of a person's income that is paid in tax, usually expressed as a percentage.", topic:"Macroeconomics", group:"tax_types" },
+
+// ── B ───────────────────────────────────────────────────────────────
+{ id:"balance_of_payments", term:"Balance of Payments", def:"A record of the value of all the transactions between the residents of a country with the residents of all other countries over a given period of time.", topic:"International", group:"balance_of_payments" },
+{ id:"balance_trade_goods", term:"Balance of Trade in Goods", def:"A measure of the revenue received from the exports of tangible (physical) goods minus the expenditure on the imports of tangible goods over a given period of time.", topic:"International", group:"balance_of_payments" },
+{ id:"balance_trade_services", term:"Balance of Trade in Services", def:"A measure of the revenue received from the exports of services minus the expenditure on the imports of services over a given period of time.", topic:"International", group:"balance_of_payments" },
+{ id:"behavioural_economics", term:"Behavioural Economics", def:"A branch of economic research that adds elements of psychology to traditional models in an attempt to better understand decision-making by economic actors. It challenges the assumption that actors will always make rational choices with the aim of maximising utility.", topic:"Behavioral", group:null },
+{ id:"bounded_rationality", term:"Bounded Rationality", def:"Suggests that most consumers and businesses do not have enough information to make fully-informed choices and so opt to satisfice, rather than maximise their utility.", topic:"Behavioral", group:"behavioral_biases" },
+{ id:"bounded_self_control", term:"Bounded Self-Control", def:"Consumers are often not rational in their self-control and do not stop consuming even when it is sensible to stop — consuming even though the price exceeds the marginal utility gained from consumption.", topic:"Behavioral", group:"behavioral_biases" },
+{ id:"bounded_selfishness", term:"Bounded Selfishness", def:"Concern for the well-being of others.", topic:"Behavioral", group:"behavioral_biases" },
+{ id:"budget_deficit", term:"Budget Deficit", def:"When (planned) government spending is greater than government revenues.", topic:"Macroeconomics", group:null },
+{ id:"business_confidence", term:"Business Confidence", def:"An economic indicator that measures the degree of optimism that business managers feel about the state of the economy and the prospects of their companies or organisations.", topic:"Macroeconomics", group:null },
+{ id:"business_cycle", term:"Business Cycle", def:"The periodic fluctuations in real national income/output/GDP around the productive potential or long-term trend of the economy. Its stages are slump/trough, recovery/expansion, boom and recession.", topic:"Macroeconomics", group:null },
+
+// ── C ───────────────────────────────────────────────────────────────
+{ id:"capital", term:"Capital", def:"The factor of production that comes from investment in physical capital and human capital. Physical capital is the stock of manufactured resources (e.g. factories, roads, tools) and human capital is the value of the workforce (improved through education or better health care).", topic:"Microeconomics", group:"factors_production" },
+{ id:"capital_account", term:"Capital Account", def:"A measure of the buying and selling of assets between countries. The assets are often separated to show assets that represent ownership and assets that represent lending.", topic:"International", group:"balance_of_payments" },
+{ id:"capital_flight", term:"Capital Flight", def:"Occurs when money and other assets flow out of a country to seek a 'safe haven' in another country.", topic:"International", group:null },
+{ id:"capital_transfers", term:"Capital Transfers", def:"A measure of net monetary movements gained or lost through actions such as the transfer of goods and financial assets by migrants entering or leaving the country, transfers relating to the sale of fixed assets, gift taxes, inheritance taxes, and death duties.", topic:"International", group:"balance_of_payments" },
+{ id:"carbon_taxes", term:"Carbon (Emissions) Taxes", def:"Taxes levied on the carbon contents of fuel.", topic:"Microeconomics", group:"government_intervention" },
+{ id:"central_banks", term:"Central Banks", def:"Institutions with the following responsibilities: regulator of commercial banks; banker to the government; control of interest rates; control of money supply; implementing monetary policies; maintenance of price stability; control of exchange rate policy; holder of foreign exchange reserves; provider and printer of notes and coins; promoting full employment.", topic:"Macroeconomics", group:null },
+{ id:"centrally_planned_economy", term:"Centrally Planned Economy", def:"An economic system where resources are allocated by the government or a central planning authority.", topic:"Macroeconomics", group:"economic_systems" },
+{ id:"ceteris_paribus", term:"Ceteris Paribus", def:"A Latin expression meaning 'other things being equal'.", topic:"Microeconomics", group:null },
+{ id:"choice_architecture", term:"Choice Architecture", def:"Suggests that the decisions we make are affected by the layout, sequencing, and range of choices that are available.", topic:"Behavioral", group:"nudge_tools" },
+{ id:"circular_economy", term:"Circular Economy", def:"An economic system that looks beyond the linear take-make-dispose model and aims to redefine growth, focusing on society-wide benefits. Based on three principles: design out waste, keep products and materials in use, and regenerate natural systems.", topic:"Microeconomics", group:null },
+{ id:"circular_flow", term:"Circular Flow of Income", def:"A simplified model of the economy that shows the flow of money through the economy.", topic:"Macroeconomics", group:null },
+{ id:"coase_theorem", term:"Coase Theorem", def:"States that when an externality is created and there is a conflict due to assigned property rights, the two parties can bargain with each other to reach an efficient outcome regardless of who actually has the initial property rights, assuming no bargaining costs.", topic:"Microeconomics", group:null },
+{ id:"collusive_oligopoly", term:"Collusive Oligopoly", def:"Where a few firms act together to avoid competition by resorting to agreements to fix prices or output in an oligopoly.", topic:"Microeconomics", group:"oligopoly_types" },
+{ id:"common_access_resources", term:"Common Access Resources", def:"Natural resources over which there is no established private ownership — they are non-excludable, but rivalrous.", topic:"Microeconomics", group:null },
+{ id:"common_market", term:"Common Market", def:"A customs union with common policies on product regulation, and free movement of goods, services, capital, and labour.", topic:"International", group:"trade_blocs" },
+{ id:"comparative_advantage", term:"Comparative Advantage", def:"One country is able to produce a good at a lower opportunity cost than another.", topic:"International", group:null },
+{ id:"competitive_supply", term:"Competitive Supply", def:"Exists where products are produced by the same factors of production, and so compete for these resources for their production.", topic:"Microeconomics", group:null },
+{ id:"complementary_goods", term:"Complementary Goods", def:"Goods that are consumed with each other, or goods that have negative cross-price elasticity of demand.", topic:"Microeconomics", group:null },
+{ id:"concentration_ratios", term:"Concentration Ratios", def:"Functions showing the percentage of market share (or output) held by the largest X firms in an industry, expressed in the form CRX, where X represents the number of the largest firms. Most commonly expressed as CR4.", topic:"Microeconomics", group:"market_structures" },
+{ id:"concessional_loans", term:"Concessional Long-Term Loans", def:"A form of aid with a very low or no rate of interest; repayments are stretched over a long time period, may include a grace period, and may be repayable in local currency.", topic:"Development", group:"types_aid" },
+{ id:"consumer_confidence", term:"Consumer Confidence", def:"An economic indicator that measures the degree of optimism that consumers feel about the state of the economy and their own personal financial situation.", topic:"Macroeconomics", group:null },
+{ id:"consumer_nudges", term:"Consumer Nudges", def:"Positive reinforcement and indirect suggestions used to influence the behaviour and decision making of consumers.", topic:"Behavioral", group:"nudge_tools" },
+{ id:"cpi", term:"Consumer Price Index (CPI)", def:"A measure of the average rate of inflation which calculates the change in the price of a representative basket of goods and services purchased by the 'average' consumer.", topic:"Macroeconomics", group:null },
+{ id:"consumer_surplus", term:"Consumer Surplus", def:"The additional benefit/utility received by consumers by paying a price that is lower than they are willing to pay.", topic:"Microeconomics", group:null },
+{ id:"consumption", term:"Consumption", def:"Spending by individuals and households on domestic consumer goods and services over a period of time.", topic:"Macroeconomics", group:null },
+{ id:"contractionary_monetary", term:"Contractionary Monetary Policy", def:"A monetary policy designed to decrease aggregate demand and thus the level of economic activity.", topic:"Macroeconomics", group:null },
+{ id:"csr", term:"Corporate Social Responsibility", def:"An approach taken by firms where they attempt to produce responsibly and ethically towards the community and environment, demonstrating a positive impact on society.", topic:"Microeconomics", group:null },
+{ id:"cost_push_inflation", term:"Cost-Push Inflation", def:"Inflation caused by an increase in the costs of production in an economy, i.e. a shift of the SRAS curve to the left.", topic:"Macroeconomics", group:"types_inflation" },
+{ id:"credit_creation", term:"Credit Creation", def:"The ability of commercial banks to expand the deposits of money that they receive by lending multiples of the amount, thus increasing the overall money supply.", topic:"Macroeconomics", group:null },
+{ id:"crowding_out", term:"Crowding Out", def:"A situation where the government spends more (government expenditure) than it receives in revenue (mainly taxation), and needs to borrow money, forcing up interest rates thereby reducing investment and consumption.", topic:"Macroeconomics", group:null },
+{ id:"cross_ped", term:"Cross Elasticity of Demand", def:"The responsiveness of the demand for one good to a change in the price of another good.", topic:"Microeconomics", group:"types_elasticity" },
+{ id:"current_account", term:"Current Account", def:"A record of the revenues earned from the export of goods and services and the expenditure on imports of goods and services.", topic:"International", group:"balance_of_payments" },
+{ id:"current_account_deficit", term:"Current Account Deficit", def:"When the net flow of money from trade in goods and services, and income flows and/or transfers, is negative — i.e. the outflows of money from trade in goods and services, income flows, and/or transfers is larger than the inflows.", topic:"International", group:null },
+{ id:"current_account_surplus", term:"Current Account Surplus", def:"Where revenues from the exports of goods and services are greater than the spending on the imports of goods and services.", topic:"International", group:null },
+{ id:"current_transfers", term:"Current Transfers", def:"Recorded in the balance of payments whenever an economy receives goods, services, income, or financial items without something in return. All transfers not considered to be capital are current.", topic:"International", group:"balance_of_payments" },
+{ id:"customs_union", term:"Customs Union", def:"A form of trade agreement where members trade freely amongst themselves and have common external tariffs (common external trade policies) with non-members.", topic:"International", group:"trade_blocs" },
+{ id:"cyclical_unemployment", term:"Cyclical (Demand-Deficient) Unemployment", def:"Disequilibrium unemployment that exists when there is insufficient demand in the economy and wages do not fall to compensate for this.", topic:"Macroeconomics", group:"types_unemployment" },
+
+// ── D ───────────────────────────────────────────────────────────────
+{ id:"debt_relief", term:"Debt Relief", def:"The act of eliminating the debt owed by an economically least developed country in order to allow it to achieve development objectives.", topic:"Development", group:null },
+{ id:"default_choices", term:"Default Choices", def:"When consumers are automatically enrolled in a system, so that the consumer will 'make' this choice if they take no action.", topic:"Behavioral", group:"nudge_tools" },
+{ id:"deflation", term:"Deflation", def:"A persistent fall in the average level of prices in an economy.", topic:"Macroeconomics", group:"types_inflation" },
+{ id:"deflationary_gap", term:"Deflationary/Recessionary Gap", def:"The situation where total spending (aggregate demand) is less than the full employment level of output, thus causing unemployment.", topic:"Macroeconomics", group:null },
+{ id:"demand", term:"Demand", def:"The quantity of goods and services that consumers are willing, and able to buy at each possible price over a given period of time.", topic:"Microeconomics", group:null },
+{ id:"demand_management", term:"Demand Management", def:"A Keynesian policy emphasising the importance of government intervention in managing the level of aggregate demand in the economy, through fiscal and monetary policies.", topic:"Macroeconomics", group:null },
+{ id:"demand_pull_inflation", term:"Demand-Pull Inflation", def:"Inflation caused by increasing aggregate demand in an economy, i.e. a shift of the AD curve to the right.", topic:"Macroeconomics", group:"types_inflation" },
+{ id:"demerit_goods", term:"Demerit Goods", def:"Goods or services considered to be harmful to people that would be over-provided by the market and so over-consumed.", topic:"Microeconomics", group:null },
+{ id:"depreciation", term:"Depreciation", def:"A fall in the value of one currency against another currency in a floating exchange rate system as the result of market forces.", topic:"International", group:null },
+{ id:"deregulation", term:"Deregulation", def:"A type of supply-side policy where the government reduces the number or type of regulations governing the behaviour of firms.", topic:"Macroeconomics", group:null },
+{ id:"devaluation", term:"Devaluation", def:"A decrease in the value of a currency in a fixed exchange rate system.", topic:"International", group:null },
+{ id:"developing_countries", term:"Developing Countries", def:"Countries characterised by: low per capita income; high rates of poverty; low standard of living; low HDI ranking/value.", topic:"Development", group:null },
+{ id:"development_aid", term:"Development Aid", def:"Aid that consists of grants, concessional long-term loans, project aid, and programme aid.", topic:"Development", group:"types_aid" },
+{ id:"disinflation", term:"Disinflation", def:"When the average (general) price level is increasing at a decreasing rate.", topic:"Macroeconomics", group:"types_inflation" },
+{ id:"dumping", term:"Dumping", def:"The selling of a good in another country at a price below its cost of production or below the price in the home market.", topic:"International", group:null },
+
+// ── E ───────────────────────────────────────────────────────────────
+{ id:"economic_development", term:"Economic Development", def:"A broader concept than economic growth involving welfare improvements to the standard of living including health, education and shelter.", topic:"Development", group:null },
+{ id:"economic_growth", term:"Economic Growth", def:"Increased real output for an economy over time, measured by an increase in real GDP; or an increase in the potential output of the economy where the PPC shifts outwards.", topic:"Macroeconomics", group:null },
+{ id:"economic_wellbeing", term:"Economic Well-Being", def:"A multi-dimensional concept relating to the level of prosperity and quality of living standards in a country.", topic:"Development", group:null },
+{ id:"eldc", term:"Economically Least Developed Countries (ELDCs)", def:"Countries classified by the UN as being 'low income countries confronting severe structural impediments to sustainable development. They are highly vulnerable to economic and environmental shocks and have low levels of human assets'.", topic:"Development", group:null },
+{ id:"economics", term:"Economics", def:"The science that studies human behaviour as a relationship between ends and scarce resources which have alternative uses (Lionel Robbins, 1932).", topic:"Microeconomics", group:null },
+{ id:"economies_of_scale", term:"Economies of Scale", def:"A fall in long run unit costs that comes about as a result of a firm increasing its scale of operations.", topic:"Microeconomics", group:null },
+{ id:"efficiency", term:"Efficiency", def:"A quantifiable concept, determined by the ratio of useful output to total input.", topic:"Microeconomics", group:null },
+{ id:"elasticity", term:"Elasticity", def:"A measure of the responsiveness of something to a change in one of its determinants.", topic:"Microeconomics", group:null },
+{ id:"ped_exports", term:"Elasticity of Demand for Exports", def:"A measure of the responsiveness of the quantity demanded of exports when there is a change in the price of exports.", topic:"International", group:"types_elasticity" },
+{ id:"ped_imports", term:"Elasticity of Demand for Imports", def:"A measure of the responsiveness of the quantity demanded of imports when there is a change in the price of imports.", topic:"International", group:"types_elasticity" },
+{ id:"engel_curve", term:"Engel Curve", def:"A curve showing the relationship between income and quantity demanded.", topic:"Microeconomics", group:null },
+{ id:"entrepreneurship", term:"Entrepreneurship", def:"The factor of production involving organising and risk-taking.", topic:"Microeconomics", group:"factors_production" },
+{ id:"equilibrium_price", term:"Equilibrium Price", def:"The market-clearing price, set where demand equals supply.", topic:"Microeconomics", group:null },
+{ id:"equity", term:"Equity", def:"The concept or idea of fairness.", topic:"Microeconomics", group:null },
+{ id:"excess_demand", term:"Excess Demand", def:"The situation where, at a given price, quantity demanded exceeds quantity supplied.", topic:"Microeconomics", group:null },
+{ id:"excess_supply", term:"Excess Supply", def:"Occurs where the price of a good is higher than the equilibrium price, such that the quantity supplied is greater than the quantity demanded.", topic:"Microeconomics", group:null },
+{ id:"exchange_rate", term:"Exchange Rate", def:"The price of one currency expressed in terms of another, for example £1 = $1.25.", topic:"International", group:null },
+{ id:"expansionary_monetary", term:"Expansionary Monetary Policy", def:"A monetary policy designed to increase aggregate demand and thus the level of economic activity.", topic:"Macroeconomics", group:null },
+{ id:"expenditure_reducing", term:"Expenditure Reducing", def:"Policies implemented by the government that attempt to reduce overall expenditure in the economy, including expenditure on imports.", topic:"International", group:null },
+{ id:"expenditure_switching", term:"Expenditure Switching", def:"Policies implemented by the government that attempt to switch the expenditure of domestic consumers away from imports towards domestically produced goods and services.", topic:"International", group:null },
+{ id:"export_promotion", term:"Export Promotion", def:"Strategies based on openness and increased international trade. Growth is achieved by concentrating on increasing exports and export revenue as a leading factor in the AD of the economy.", topic:"International", group:null },
+{ id:"export_revenue", term:"Export Revenue", def:"Value of exports earned by producers.", topic:"International", group:null },
+{ id:"exports", term:"Exports", def:"Goods and services produced in one country and purchased by consumers in another country.", topic:"International", group:null },
+{ id:"external_balance", term:"External Balance", def:"The value of exports of goods and services minus the value of imports of goods and services.", topic:"International", group:null },
+{ id:"neg_ext_consumption", term:"Negative Externalities of Consumption", def:"The negative effects that are suffered by a third party when a good or service is consumed.", topic:"Microeconomics", group:"types_externalities" },
+{ id:"neg_ext_production", term:"Negative Externalities of Production", def:"The negative effects that are suffered by a third party when a good or service is produced.", topic:"Microeconomics", group:"types_externalities" },
+
+// ── F ───────────────────────────────────────────────────────────────
+{ id:"factors_of_production", term:"Factors of Production", def:"The four types of resources used in the production process: land, labour, capital (and possibly entrepreneurship/management/enterprise).", topic:"Microeconomics", group:null },
+{ id:"fairtrade", term:"Fairtrade", def:"A scheme where products from producers in economically least developed countries can be certified to display the registered Fairtrade mark, encouraging consumers to buy them because producers have been paid a fair price and products produced under approved conditions.", topic:"Development", group:null },
+{ id:"financial_account", term:"Financial Account", def:"Consists of (net) direct investment, (net) portfolio investment, and reserve assets.", topic:"International", group:"balance_of_payments" },
+{ id:"fiscal_policy", term:"Fiscal Policy", def:"The use of government spending and taxation to shift the AD curve.", topic:"Macroeconomics", group:null },
+{ id:"fixed_exchange_rate", term:"Fixed Exchange Rate", def:"When a currency's value is fixed against the value of another currency, a basket of other currencies, or gold.", topic:"International", group:"exchange_rate_systems" },
+{ id:"floating_exchange_rate", term:"Floating Exchange Rate", def:"Where the exchange rate (i.e. price of one currency in terms of another) changes according to the market forces of demand and supply.", topic:"International", group:"exchange_rate_systems" },
+{ id:"foreign_aid", term:"Foreign Aid", def:"The international transfer of capital, goods, or services from a country, or international organisation, for the benefit of a recipient country and its population.", topic:"Development", group:"types_aid" },
+{ id:"fdi", term:"Foreign Direct Investment", def:"Long-term investment in a foreign country through the establishment of production units by multinational companies in a foreign country, representing at least 10% ownership.", topic:"International", group:null },
+{ id:"foreign_sector", term:"Foreign Sector", def:"The segment of the circular flow of income that includes exports and imports.", topic:"Macroeconomics", group:null },
+{ id:"framing", term:"Framing", def:"The way that choices are described and presented. Changing the framing of a choice may affect tastes and preferences.", topic:"Behavioral", group:"nudge_tools" },
+{ id:"free_good", term:"Free Good", def:"Unlimited in supply and has no opportunity cost.", topic:"Microeconomics", group:null },
+{ id:"free_market_economy", term:"Free Market Economy", def:"An economy where the means of production are privately held by individuals and firms. Demand and supply (market forces) determine what/how much to produce, how to produce, and for whom to produce.", topic:"Microeconomics", group:"economic_systems" },
+{ id:"free_rider", term:"Free Rider Problem", def:"Occurs when people who benefit from consuming resources, goods, or services do not have to pay for them, which results in overconsumption.", topic:"Microeconomics", group:null },
+{ id:"free_trade", term:"Free Trade", def:"Exists where there is trade between different countries without government intervention or regulation.", topic:"International", group:null },
+{ id:"free_trade_area", term:"Free Trade Area/Agreement", def:"An agreement whereby there is free trade among member countries, but each member can maintain its own trade barriers in trade with non-member countries.", topic:"International", group:"trade_blocs" },
+{ id:"frictional_unemployment", term:"Frictional Unemployment", def:"Equilibrium unemployment that exists when people have left a job and are in the process of searching for another job.", topic:"Macroeconomics", group:"types_unemployment" },
+{ id:"full_employment_output", term:"Full Employment Level of Output", def:"The level of output that is produced by the economy when there is only natural unemployment.", topic:"Macroeconomics", group:null },
+
+// ── G ───────────────────────────────────────────────────────────────
+{ id:"gdp", term:"Gross Domestic Product (GDP)", def:"The total money value of all final goods and services produced in an economy in a given time period, usually one year.", topic:"Macroeconomics", group:"income_gdp" },
+{ id:"gdp_per_capita", term:"GDP Per Capita", def:"The total value of all final goods and services produced in an economy in a year divided by the population (per head).", topic:"Development", group:"income_gdp" },
+{ id:"real_gdp", term:"Real GDP", def:"The total value of all output (goods and services) produced in an economy over a given time period, adjusted for inflation (changes in price level).", topic:"Macroeconomics", group:"income_gdp" },
+{ id:"gini_coefficient", term:"Gini Coefficient", def:"A measure of inequality in the distribution of income.", topic:"Development", group:"development_indicators" },
+{ id:"govt_debt", term:"Government (National) Debt", def:"The total outstanding borrowing of a government, made up of internal debt (owing to national creditors) and external debt (owing to foreign creditors).", topic:"Macroeconomics", group:null },
+{ id:"govt_spending", term:"Government Spending (G)", def:"Spending by governments on goods and services.", topic:"Macroeconomics", group:null },
+{ id:"gni", term:"Gross National Income (GNI)", def:"The total money value of all final goods and services produced in an economy in one year, plus net property income from abroad (interest, rent, dividends and profit).", topic:"Macroeconomics", group:"income_gdp" },
+{ id:"growth_ppc", term:"Growth in Production Possibilities", def:"Occurs when the PPC curve shifts outwards, caused by an increase in the quantity and/or quality of factors of production.", topic:"Macroeconomics", group:null },
+
+// ── H ───────────────────────────────────────────────────────────────
+{ id:"happiness_index", term:"Happiness Index", def:"An index which is used to measure the collective happiness and well-being of a population.", topic:"Development", group:"development_indicators" },
+{ id:"happy_planet_index", term:"Happy Planet Index", def:"An index that combines four elements to show how efficiently residents of different countries are using environmental resources to lead long, happy lives. The elements are well-being, life expectancy, inequality of outcomes, and ecological footprint.", topic:"Development", group:"development_indicators" },
+{ id:"households", term:"Households", def:"Represent the groups of individuals in the economy who perform two functions: they are the consumers of goods and services, and they are the owners and providers of the factors of production.", topic:"Macroeconomics", group:null },
+{ id:"hdi", term:"Human Development Index (HDI)", def:"Measures three dimensions: health (life expectancy at birth); education (mean years of schooling and expected years of schooling); and income (GNI per capita or GDP per capita).", topic:"Development", group:"development_indicators" },
+{ id:"ihdi", term:"Inequality Adjusted HDI (IHDI)", def:"Measures the same three dimensions as the HDI — health, education, and income — but each is adjusted for inequality.", topic:"Development", group:"development_indicators" },
+{ id:"hoi", term:"Human Opportunity Index (HOI)", def:"Measures how individual circumstances, such as place of residence, gender, and education of the household head, can affect a child's access to basic opportunities such as water, education, electricity and sanitation. Created by the World Bank.", topic:"Development", group:"development_indicators" },
+{ id:"human_resources", term:"Human Resources", def:"The labour force of a country.", topic:"Development", group:null },
+{ id:"humanitarian_aid", term:"Humanitarian Aid", def:"Aid given to alleviate short-term suffering, consisting of food aid, medical aid, and emergency relief aid.", topic:"Development", group:"types_aid" },
+
+// ── I ───────────────────────────────────────────────────────────────
+{ id:"imperfect_competition", term:"Imperfect Competition", def:"A market structure showing some, but not all, features of perfect competition.", topic:"Microeconomics", group:"market_structures" },
+{ id:"imperfect_information", term:"Imperfect Information", def:"Exists where some stakeholders in an economic transaction have more access to knowledge than others.", topic:"Microeconomics", group:null },
+{ id:"import_expenditure", term:"Import Expenditure", def:"Value of spending on imports.", topic:"International", group:null },
+{ id:"imports", term:"Imports", def:"Goods and services purchased by consumers in one country that have been produced in another country.", topic:"International", group:null },
+{ id:"import_substitution", term:"Import Substitution Policies/Strategies", def:"Designed to encourage the domestic production of goods, rather than importing them. The strategies encourage protectionism.", topic:"International", group:null },
+{ id:"incentive_effect", term:"Incentive Effect", def:"Prices give producers the incentive to either increase or decrease the quantity they supply. A rising price gives producers the incentive to increase quantity supplied, as the higher price may allow them to earn higher revenues.", topic:"Microeconomics", group:null },
+{ id:"income", term:"Income", def:"A flow of earnings from using factors of production to produce goods and services. Wages and salaries are the factor reward to labour and interest is the flow of income for the ownership of capital.", topic:"Microeconomics", group:null },
+{ id:"income_effect", term:"Income Effect", def:"When a decrease in the price of a good or service that is being consumed means that consumers experience an increase in real income, usually allowing them to purchase more of the product. The income effect may be negative.", topic:"Microeconomics", group:null },
+{ id:"yed", term:"Income Elasticity of Demand", def:"The measure of the responsiveness of demand of a good or service to a change in income.", topic:"Microeconomics", group:"types_elasticity" },
+{ id:"indebtedness", term:"Indebtedness", def:"The amount of money that a country owes to other countries and/or international institutions.", topic:"Development", group:null },
+{ id:"indirect_taxation", term:"Indirect Taxation", def:"An expenditure tax or a tax levied on goods and services imposed by the government.", topic:"Macroeconomics", group:"tax_types" },
+{ id:"infant_industries", term:"Infant Industries", def:"New industries which do not benefit from economies of scale that need protection to compete with imports.", topic:"International", group:null },
+{ id:"inferior_goods", term:"Inferior Goods", def:"A good where the demand for it decreases as income increases and more superior goods are purchased.", topic:"Microeconomics", group:null },
+{ id:"inflation", term:"Inflation", def:"A sustained increase in the general or average level of prices.", topic:"Macroeconomics", group:null },
+{ id:"inflation_rate", term:"Inflation Rate", def:"The percentage change of a price index over a certain time period.", topic:"Macroeconomics", group:null },
+{ id:"inflationary_gap", term:"Inflationary Gap", def:"Refers to inflationary pressure created by the current (or SR) equilibrium being above the full employment (or LR) equilibrium.", topic:"Macroeconomics", group:null },
+{ id:"informal_markets", term:"Informal Markets", def:"Markets in which economic activity is not officially measured or recorded.", topic:"Development", group:null },
+{ id:"informal_sector", term:"Informal Sector", def:"Economic activity that is unrecorded (illegal/not taxed) in national income accounts by the government.", topic:"Development", group:null },
+{ id:"infrastructure", term:"Infrastructure", def:"Large-scale public systems (services and facilities) of a country that are necessary for economic activity. They are considered the capital stock of a nation and are usually supplied by the government.", topic:"Development", group:null },
+{ id:"injections", term:"Injections", def:"The investment, government expenditure and export revenues that add spending to the circular flow of income.", topic:"Macroeconomics", group:null },
+{ id:"interest_rates", term:"Interest Rates", def:"The price of capital or the price of borrowed/loaned money, or the reward for saving, usually expressed as a percentage.", topic:"Macroeconomics", group:null },
+{ id:"imf", term:"International Monetary Fund (IMF)", def:"An organisation working to foster global monetary cooperation, secure financial stability, facilitate international trade, and reduce poverty.", topic:"International", group:null },
+{ id:"international_trade", term:"International Trade", def:"Trade that involves the exchange of goods or services between two countries.", topic:"International", group:null },
+{ id:"investment", term:"Investment", def:"Expenditure by firms on capital equipment and is an injection into the economy.", topic:"Macroeconomics", group:null },
+
+// ── J ───────────────────────────────────────────────────────────────
+{ id:"j_curve", term:"J-Curve", def:"Suggests that in the short term, even if the Marshall-Lerner condition is fulfilled, a fall in the value of the currency will lead to a worsening of the current account deficit, before things improve in the long run.", topic:"International", group:null },
+{ id:"joint_supply", term:"Joint Supply", def:"Goods which are produced together, or where the production of one good involves the production of another product (for example, as a by-product of production).", topic:"Microeconomics", group:null },
+
+// ── K ───────────────────────────────────────────────────────────────
+{ id:"keynesian_multiplier", term:"Keynesian Multiplier", def:"The ratio of an induced change in the level of national income to an original change in one or more of the injections into the circular flow of income (i.e. investment, government spending, or export revenue).", topic:"Macroeconomics", group:null },
+{ id:"keynesian_revolution", term:"Keynesian Revolution", def:"An economic school of thought based upon the works of John Maynard Keynes, challenging the classical (laissez faire) viewpoint and advocating the role of government in managing the level of aggregate demand.", topic:"Macroeconomics", group:null },
+
+// ── L ───────────────────────────────────────────────────────────────
+{ id:"labour", term:"Labour", def:"The human factor of production. It is the physical and mental contribution of the existing work force to production.", topic:"Microeconomics", group:"factors_production" },
+{ id:"labour_market_flex", term:"Labour Market Flexibility", def:"Refers to the speed with which labour markets adapt to fluctuations and changes in production, the economy, or society.", topic:"Macroeconomics", group:null },
+{ id:"labour_union", term:"Labour Union", def:"An organisation of workers whose goals include the improvement of working conditions and payments to workers. Unions work on behalf of workers through negotiations (collective bargaining) with management.", topic:"Macroeconomics", group:null },
+{ id:"laissez_faire", term:"Laissez Faire", def:"The view that markets should be left alone, with minimal intervention by government.", topic:"Microeconomics", group:null },
+{ id:"land", term:"Land", def:"The physical factor of production. It consists of natural resources, some of which are renewable (for example, wheat) and some of which are non-renewable (for example, iron ore).", topic:"Microeconomics", group:"factors_production" },
+{ id:"law_of_demand", term:"Law of Demand", def:"As the price of a good falls, the quantity demanded will normally increase.", topic:"Microeconomics", group:null },
+{ id:"law_of_supply", term:"Law of Supply", def:"As the price of a good rises, the quantity supplied will normally rise.", topic:"Microeconomics", group:null },
+{ id:"leakages", term:"Leakages", def:"The savings, taxes and import expenditure that remove spending from the circular flow of income.", topic:"Macroeconomics", group:null },
+{ id:"lras", term:"Long Run Aggregate Supply (LRAS)", def:"Aggregate supply that is dependent upon the resources in the economy and that can only be increased by improvements in the quantity and/or quality of factors of production.", topic:"Macroeconomics", group:null },
+{ id:"lr_phillips", term:"Long-Run Phillips Curve", def:"A curve showing the monetarist view that there is no trade-off between inflation and unemployment in the long run and that there exists a natural rate of unemployment that can only be affected by supply-side policies.", topic:"Macroeconomics", group:null },
+{ id:"lorenz_curve", term:"Lorenz Curve", def:"A curve showing what percentage of the population owns what percentage of the total income in the economy, calculated in cumulative terms. The further the curve is from the line of absolute equality (45-degree line), the more unequal is the distribution of income.", topic:"Development", group:null },
+
+// ── M ───────────────────────────────────────────────────────────────
+{ id:"macroeconomics", term:"Macroeconomics", def:"The study of aggregate economic activity. It investigates how the economy as a whole works.", topic:"Macroeconomics", group:null },
+{ id:"managed_exchange_rates", term:"Managed Exchange Rates", def:"A system where the exchange rate is determined by market forces, but the government/Central Bank intervenes from time to time in order to keep it within a certain band (range).", topic:"International", group:"exchange_rate_systems" },
+{ id:"mandated_choices", term:"Mandated Choices", def:"When consumers are required to state whether or not they wish to take part in an action.", topic:"Behavioral", group:"nudge_tools" },
+{ id:"manufactured_goods", term:"Manufactured Goods", def:"Goods that have been processed by workers.", topic:"International", group:null },
+{ id:"marginal_costs", term:"Marginal Costs", def:"The additional costs of producing one more unit of output.", topic:"Microeconomics", group:null },
+{ id:"mpc", term:"Marginal Propensity to Consume (MPC)", def:"The proportion of each extra amount of income that is spent by households on domestically produced goods and services (consumption), expressed as a decimal.", topic:"Macroeconomics", group:null },
+{ id:"mpm", term:"Marginal Propensity to Import (MPM)", def:"The proportion of each extra amount of income that is spent by households on imported goods and services, expressed as a decimal.", topic:"Macroeconomics", group:null },
+{ id:"mps", term:"Marginal Propensity to Save (MPS)", def:"The proportion of each extra amount of income that is saved by households, expressed as a decimal.", topic:"Macroeconomics", group:null },
+{ id:"mpt", term:"Marginal Propensity to Tax (MPT)", def:"The proportion of each extra amount of income that is taken in tax, expressed as a decimal.", topic:"Macroeconomics", group:null },
+{ id:"msb", term:"Marginal Social Benefit (MSB)", def:"The extra benefit/utility to society of consuming an additional unit of output, including both the private benefit and the external benefit.", topic:"Microeconomics", group:null },
+{ id:"msc", term:"Marginal Social Cost (MSC)", def:"The extra cost to society of producing an additional unit of output, including both the private cost and the external costs.", topic:"Microeconomics", group:null },
+{ id:"marginal_tax_rate", term:"Marginal Tax Rate", def:"The proportion of a person's additional income that is paid in tax, usually expressed as a percentage.", topic:"Macroeconomics", group:"tax_types" },
+{ id:"marginal_utility", term:"Marginal Utility", def:"The extra utility derived from consuming one more unit of a good or service.", topic:"Microeconomics", group:null },
+{ id:"market", term:"Market", def:"The interaction between buyers and sellers in order to exchange goods or services (to make an economic transaction).", topic:"Microeconomics", group:null },
+{ id:"market_demand", term:"Market Demand", def:"The horizontal sum of the individual demand curves for a product of all the consumers in a market.", topic:"Microeconomics", group:null },
+{ id:"market_economy", term:"Market Economy", def:"An economy where resource allocation is determined mainly by market forces of demand and supply.", topic:"Microeconomics", group:"economic_systems" },
+{ id:"market_equilibrium", term:"Market Equilibrium", def:"The point where the quantity of a product demanded is equal to the quantity supplied. This creates the market clearing price and quantity where there is no excess demand or excess supply.", topic:"Microeconomics", group:null },
+{ id:"market_failure", term:"Market Failure", def:"The failure of markets to produce at the point where community surplus (consumer surplus + producer surplus) is maximised.", topic:"Microeconomics", group:null },
+{ id:"market_mechanism", term:"Market Mechanism", def:"The system in which the forces of demand and supply determine the prices of products. Also known as the price mechanism.", topic:"Microeconomics", group:null },
+{ id:"market_oriented_policies", term:"Market-Oriented Policies", def:"Policies that support the allocation of resources by supply and demand (price mechanism) rather than through government intervention in markets.", topic:"Development", group:null },
+{ id:"market_power", term:"Market Power", def:"The ability of a firm (or group of firms) to raise and maintain price above the level that would prevail under perfect competition.", topic:"Microeconomics", group:null },
+{ id:"market_supply", term:"Market Supply", def:"The horizontal sum of the individual supply curves for a product of all the producers in a market.", topic:"Microeconomics", group:null },
+{ id:"marshall_lerner", term:"Marshall-Lerner Condition", def:"States that a depreciation, or devaluation, of a currency will only lead to an improvement in the current account balance if the sum of the elasticity of demand for exports plus the elasticity of demand for imports is greater than one.", topic:"International", group:null },
+{ id:"maximum_price", term:"Maximum Price", def:"The upper limit imposed by the government below which the price may not fall. A maximum price is usually set below the equilibrium to aid relatively poor consumers.", topic:"Microeconomics", group:"government_intervention" },
+{ id:"merit_goods", term:"Merit Goods", def:"Goods or services with strong positive externalities that would be under-provided by the market and so under-consumed.", topic:"Microeconomics", group:null },
+{ id:"microeconomics", term:"Microeconomics", def:"The study of the behaviour of individual consumers, firms, and industries and the determination of market prices and quantities of goods, services, and factors of production.", topic:"Microeconomics", group:null },
+{ id:"microfinance", term:"Microfinance", def:"The provision of small loans to poor entrepreneurs who lack access to traditional banking services.", topic:"Development", group:null },
+{ id:"minimum_price", term:"Minimum Price", def:"The lower limit imposed by the government below which the price may not fall. A minimum price is usually set above the equilibrium to aid farmers.", topic:"Microeconomics", group:"government_intervention" },
+{ id:"min_reserve_req", term:"Minimum Reserve Requirements", def:"A requirement by the central bank that sets the minimum amount of reserves that commercial banks must maintain to back their loans.", topic:"Macroeconomics", group:null },
+{ id:"mixed_economy", term:"Mixed Economy", def:"An economy that has elements of planning and elements of the free market. In reality, all economies are mixed. What is different is the degree of the mix from country to country.", topic:"Macroeconomics", group:"economic_systems" },
+{ id:"monetarist_revolution", term:"Monetarist/New Classical Revolution", def:"An economic school of thought which argues that changes in the money supply are the most significant determinants of the rate of economic growth and the behaviour of the business cycle. Policy makers should not intervene to manage the level of aggregate demand.", topic:"Macroeconomics", group:null },
+{ id:"monetary_policy", term:"Monetary Policy", def:"A demand-side policy with the Central Bank using changes in the money supply or interest rates to affect AD.", topic:"Macroeconomics", group:null },
+{ id:"monetary_union", term:"Monetary Union", def:"A form of economic integration (trade bloc/common market) characterised by a common market, a common currency, a common central bank, and common monetary policy (interest rates).", topic:"International", group:"trade_blocs" },
+{ id:"money_supply", term:"Money Supply", def:"The total value of monetary assets available in an economy at a specific time.", topic:"Macroeconomics", group:null },
+{ id:"monopolistic_competition", term:"Monopolistic Competition", def:"A market where there are many buyers and sellers, producing differentiated products, with no barriers to entry.", topic:"Microeconomics", group:"market_structures" },
+{ id:"monopoly", term:"Monopoly", def:"A market structure where there is only one firm in the industry, so the firm is the industry. Monopolies may, or may not, have barriers to entry.", topic:"Microeconomics", group:"market_structures" },
+{ id:"moral_hazard", term:"Moral Hazard", def:"Occurs when a party provides misleading information and changes behaviour after a transaction has taken place.", topic:"Microeconomics", group:"behavioral_biases" },
+{ id:"mncs", term:"Multinational Corporations", def:"Companies that have productive units in more than one country, or that carry out foreign direct investment in another country.", topic:"International", group:null },
+{ id:"mpi", term:"Multidimensional Poverty Index (MPI)", def:"An international measure of acute poverty covering over 100 economically least developed countries. It complements traditional income-based poverty measures by capturing the deprivations each person faces with respect to education, health and living standards.", topic:"Development", group:"development_indicators" },
+{ id:"multiplier", term:"Multiplier (HL)", def:"The ratio of the induced change in national income to the increase in the level of injections, equal to the reciprocal of the MPS + MPT + MPM.", topic:"Macroeconomics", group:null },
+
+// ── N ───────────────────────────────────────────────────────────────
+{ id:"national_income", term:"National Income", def:"The total value of the final output of all new goods and services produced in a country in one year.", topic:"Macroeconomics", group:"income_gdp" },
+{ id:"natural_rate_unemployment", term:"Natural Rate of Unemployment", def:"The rate of unemployment that is consistent with a stable rate of inflation. It is the rate where the long run Phillips curve touches the x-axis.", topic:"Macroeconomics", group:null },
+{ id:"necessity_goods", term:"Necessity Goods", def:"A good where the demand for it increases as income increases, but the increase in demand is less than proportional to the rise in income.", topic:"Microeconomics", group:null },
+{ id:"net_exports", term:"Net Exports (X–M)", def:"Export revenues minus import expenditure.", topic:"Macroeconomics", group:null },
+{ id:"ngos", term:"NGOs", def:"Non-government organisations that exist to promote sustainable economic development and/or humanitarian ideals.", topic:"Development", group:null },
+{ id:"nominal", term:"Nominal", def:"The value of an economic variable that has not been adjusted for the effects of inflation.", topic:"Macroeconomics", group:null },
+{ id:"nominal_gdp", term:"Nominal Gross Domestic Product", def:"The total money value of all final goods and services produced in an economy in a given time period, usually one year, at current values (not adjusted for inflation).", topic:"Macroeconomics", group:"income_gdp" },
+{ id:"nominal_interest", term:"Nominal Interest Rates", def:"Interest rates that have not been adjusted for inflation.", topic:"Macroeconomics", group:null },
+{ id:"non_collusive_oligopoly", term:"Non-Collusive Oligopoly", def:"Where firms in an oligopoly do not resort to agreements to fix prices or output. Competition tends to be non-price and prices tend to be stable.", topic:"Microeconomics", group:"oligopoly_types" },
+{ id:"non_excludable", term:"Non-Excludable", def:"Non-excludability exists when it is impossible to prevent a person, or persons, from consuming a good or service.", topic:"Microeconomics", group:null },
+{ id:"ngo_formal", term:"Non-Government Organisation (NGO)", def:"A non-government organisation that exists to promote economic development and/or humanitarian ideals and/or sustainable development.", topic:"Development", group:null },
+{ id:"non_produced_assets", term:"Non-Produced, Non-Financial Assets", def:"A measure of the net international sales and purchases of non-produced assets, such as land, and intangible assets, such as patents and copyrights.", topic:"International", group:"balance_of_payments" },
+{ id:"normal_goods", term:"Normal Goods", def:"A good where the demand for it increases as income increases.", topic:"Microeconomics", group:null },
+{ id:"normal_profit", term:"Normal Profit", def:"The amount of revenue needed to cover the total costs of production, including the opportunity costs.", topic:"Microeconomics", group:null },
+{ id:"normative_economics", term:"Normative Economics", def:"Deals with areas of the subject that are open to personal opinion and belief.", topic:"Microeconomics", group:null },
+{ id:"nudge_theory", term:"Nudge Theory", def:"Generally used to describe situations where nudges (prompts, hints) are used to improve the life and wellbeing of people and society.", topic:"Behavioral", group:"nudge_tools" },
+
+// ── O ───────────────────────────────────────────────────────────────
+{ id:"oecd_bli", term:"OECD Better Life Index", def:"An index to compare well-being across countries, based on 11 topics that the OECD has identified as essential, in the areas of material living conditions and quality of life.", topic:"Development", group:"development_indicators" },
+{ id:"official_borrowing", term:"Official Borrowing", def:"International borrowing by a government to help cover a current account deficit.", topic:"International", group:null },
+{ id:"oda", term:"Official Development Assistance", def:"Aid given from a government or a government (multilateral) agency for the purpose of development and/or welfare.", topic:"Development", group:"types_aid" },
+{ id:"official_foreign_aid", term:"Official Foreign Aid", def:"Aid that is provided to a country by another government or multilateral agency.", topic:"Development", group:"types_aid" },
+{ id:"foreign_reserves", term:"Official Foreign Reserves", def:"Reserves of foreign currencies held by the Central Bank or the government of a country.", topic:"International", group:null },
+{ id:"oligopoly", term:"Oligopoly", def:"A market where few large firms dominate the industry, with characteristics such as interdependency of firms, high barriers to entry, homogeneous or differentiated products, and imperfect information.", topic:"Microeconomics", group:"market_structures" },
+{ id:"open_market_ops", term:"Open Market Operations", def:"The buying or selling of government securities in the open market in order to increase or decrease the amount of money in the economy.", topic:"Macroeconomics", group:null },
+{ id:"opportunity_cost", term:"Opportunity Cost", def:"The cost of an economic decision in terms of the next best alternative foregone.", topic:"Microeconomics", group:null },
+
+// ── P ───────────────────────────────────────────────────────────────
+{ id:"perfect_competition", term:"Perfect Competition", def:"A market structure where there are a very large number of small firms, producing identical products that are incapable of affecting the market supply curve. The firms are price takers. There are no barriers to entry or exit and all firms have perfect knowledge of the market.", topic:"Microeconomics", group:"market_structures" },
+{ id:"perfect_information", term:"Perfect Information", def:"Exists where all stakeholders in an economic transaction have access to the same knowledge.", topic:"Microeconomics", group:null },
+{ id:"perfectly_elastic_demand", term:"Perfectly Elastic Demand", def:"Where an increase in the price of a good or service leads to a fall in the quantity demanded to zero. (PED would be infinity.)", topic:"Microeconomics", group:"types_elasticity" },
+{ id:"perfectly_elastic_supply", term:"Perfectly Elastic Supply", def:"Where a fall in the price of a good or service leads to a fall in the quantity supplied to zero. (PES would be infinity.)", topic:"Microeconomics", group:"types_elasticity" },
+{ id:"perfectly_inelastic_demand", term:"Perfectly Inelastic Demand", def:"Where a change in the price of a good or service leads to no change in the quantity demanded. (PED would be equal to zero.)", topic:"Microeconomics", group:"types_elasticity" },
+{ id:"perfectly_inelastic_supply", term:"Perfectly Inelastic Supply", def:"Where a change in the price of a good or service leads to no change in the quantity supplied. (PES would be equal to zero.)", topic:"Microeconomics", group:"types_elasticity" },
+{ id:"phillips_curve", term:"Phillips Curve", def:"A curve showing the relationship between the rate of unemployment and the rate of inflation.", topic:"Macroeconomics", group:null },
+{ id:"pigouvian_taxes", term:"Pigouvian Taxes", def:"An indirect tax imposed to eliminate the external costs of negative externalities.", topic:"Microeconomics", group:"government_intervention" },
+{ id:"planned_economy", term:"Planned Economy", def:"An economy where the means of production are collectively owned (except labour). The state determines what/how much to produce, how to produce, and for whom to produce.", topic:"Macroeconomics", group:"economic_systems" },
+{ id:"porter_hypothesis", term:"Porter Hypothesis", def:"States that strict environmental regulations can lead to efficiency and encourage innovations for firms that help improve commercial competitiveness.", topic:"Microeconomics", group:null },
+{ id:"portfolio_investment", term:"Portfolio Investment", def:"The purchase of financial investments such as shares and bonds in order to gain a financial return in the form of interest or dividends.", topic:"International", group:null },
+{ id:"positive_discrimination", term:"Positive Discrimination", def:"The practice of giving advantage to groups that have been treated unfairly in the past.", topic:"Development", group:null },
+{ id:"positive_economics", term:"Positive Economics", def:"Deals with areas of the subject that are capable of being proven to be correct or not.", topic:"Microeconomics", group:null },
+{ id:"pos_ext_consumption", term:"Positive Externalities of Consumption", def:"The beneficial effects that are enjoyed by a third party when a good or service is consumed.", topic:"Microeconomics", group:"types_externalities" },
+{ id:"pos_ext_production", term:"Positive Externalities of Production", def:"The beneficial effects that are enjoyed by a third party when a good or service is produced.", topic:"Microeconomics", group:"types_externalities" },
+{ id:"poverty", term:"Poverty", def:"The scarcity or the lack of a certain amount of material possessions or money.", topic:"Development", group:null },
+{ id:"poverty_trap", term:"Poverty Trap/Cycle", def:"Any circular chain of events starting and ending in poverty, such as low income means low savings means low investment means low growth means low incomes.", topic:"Development", group:null },
+{ id:"potential_growth", term:"Potential Growth", def:"An increase in the potential output of an economy through an increase in the quantity/quality of resources.", topic:"Macroeconomics", group:null },
+{ id:"preferential_trade", term:"Preferential Trade Agreement", def:"An agreement where a country agrees to give preferential access (for example, reduced tariffs) to certain products from one or more trading partners.", topic:"International", group:"trade_blocs" },
+{ id:"price_ceiling", term:"Price Ceiling (Maximum Price)", def:"A price imposed by an authority and set below the equilibrium price. Prices cannot rise above this price.", topic:"Microeconomics", group:"government_intervention" },
+{ id:"price_controls", term:"Price Controls", def:"Prices imposed by an authority, set above or below the equilibrium market price.", topic:"Microeconomics", group:"government_intervention" },
+{ id:"price_deflator", term:"Price Deflator", def:"A coefficient that removes the impact of inflation when measuring economic statistics.", topic:"Macroeconomics", group:null },
+{ id:"price_discrimination", term:"Price Discrimination", def:"Exists when a producer charges a different price to customers for an identical good or service.", topic:"Microeconomics", group:null },
+{ id:"price_elastic_demand", term:"Price Elastic Demand", def:"Where a change in the price of a good or service leads to a proportionally larger change in the quantity demanded. (PED would be greater than one.)", topic:"Microeconomics", group:"types_elasticity" },
+{ id:"ped", term:"Price Elasticity of Demand", def:"A measure of the responsiveness of quantity demanded to a change in the price of the good.", topic:"Microeconomics", group:"types_elasticity" },
+{ id:"pes", term:"Price Elasticity of Supply", def:"A measure of the responsiveness of the quantity supplied of a good or service when there is a change in its price.", topic:"Microeconomics", group:"types_elasticity" },
+{ id:"price_floor", term:"Price Floor", def:"A price set by the government above the equilibrium price, below which the price may not fall.", topic:"Microeconomics", group:"government_intervention" },
+{ id:"price_inelastic_demand", term:"Price Inelastic Demand", def:"Where a change in the price of a good or service leads to a proportionally smaller change in the quantity demanded. (PED would be less than one.)", topic:"Microeconomics", group:"types_elasticity" },
+{ id:"price_inelastic_supply", term:"Price Inelastic Supply", def:"Where a change in the price of a good or service leads to a proportionally smaller change in the quantity supplied. (PES would be less than one.)", topic:"Microeconomics", group:"types_elasticity" },
+{ id:"price_expectations", term:"Price Expectations", def:"The forecasts or views that consumers hold about future price movements that play a role in determining consumer demand.", topic:"Microeconomics", group:null },
+{ id:"price_mechanism", term:"Price Mechanism", def:"The system where the forces of demand and supply determine the prices of products. Also known as the market mechanism.", topic:"Microeconomics", group:null },
+{ id:"primary_commodities", term:"Primary Commodities", def:"Raw materials that are produced in the primary sector.", topic:"Development", group:null },
+{ id:"primary_sector", term:"Primary Sector", def:"Extracts or harvests products directly from the earth in order to produce raw materials or food.", topic:"Development", group:null },
+{ id:"privatisation", term:"Privatisation", def:"A type of supply-side policy where the government sells public assets to the private sector.", topic:"Macroeconomics", group:null },
+{ id:"producer_surplus", term:"Producer Surplus", def:"The additional benefit received by producers by receiving a price that is higher than the price they were willing to receive.", topic:"Microeconomics", group:null },
+{ id:"product_differentiation", term:"Product Differentiation", def:"Where a producer attempts to distinguish their product from those of competitors, with the aim of making demand less price elastic.", topic:"Microeconomics", group:null },
+{ id:"ppc", term:"Production Possibility Curve (PPC)", def:"A curve showing the maximum combinations of goods or services that can be produced by an economy in a given time period, if all resources are fully and efficiently used and the state of technology is fixed.", topic:"Microeconomics", group:null },
+{ id:"productive_capacity", term:"Productive Capacity", def:"The maximum possible output of an economy.", topic:"Macroeconomics", group:null },
+{ id:"productive_efficiency", term:"Productive Efficiency", def:"Exists when production is achieved at lowest cost per unit of output, achieved at the point where average total cost is at its lowest value.", topic:"Microeconomics", group:null },
+{ id:"profit_maximisation", term:"Profit Maximisation", def:"Producing at the level of output where profits are greatest: where marginal revenue equals marginal cost.", topic:"Microeconomics", group:null },
+{ id:"progressive_tax", term:"Progressive Tax", def:"Where the higher the level of income, the higher the percentage of taxation that is paid (i.e. the higher the average rate of taxation).", topic:"Macroeconomics", group:"tax_types" },
+{ id:"property_rights", term:"Property Rights", def:"Give people a legal right to own property/assets.", topic:"Microeconomics", group:null },
+{ id:"proportional_tax", term:"Proportional Tax", def:"A system of taxation in which tax is levied at a constant rate as income rises.", topic:"Macroeconomics", group:"tax_types" },
+{ id:"public_goods", term:"Public Goods", def:"Goods or services which would not be provided at all by the market. They have the characteristics of non-rivalry and non-excludability, for example, a flood barrier.", topic:"Microeconomics", group:null },
+{ id:"ppp_partnerships", term:"Public/Private Partnerships", def:"A contractual arrangement between a public agency (federal, state or local) and a private sector firm.", topic:"Development", group:null },
+{ id:"ppp", term:"Purchasing Power Parity (PPP)", def:"A theory which states that exchange rates between currencies are in equilibrium when their purchasing power is the same in each of the two countries.", topic:"International", group:null },
+
+// ── Q ───────────────────────────────────────────────────────────────
+{ id:"qe", term:"Quantitative Easing", def:"An expansionary monetary policy where a central bank buys predetermined amounts of government bonds, or other financial assets, in order to stimulate the economy and increase the money supply.", topic:"Macroeconomics", group:null },
+{ id:"quantity_demanded", term:"Quantity Demanded", def:"The willingness and ability to purchase a quantity of a good or service at a certain price over a given time period.", topic:"Microeconomics", group:null },
+{ id:"quantity_supplied", term:"Quantity Supplied", def:"The willingness and ability to produce a quantity of a good or service at a given price over a given time period.", topic:"Microeconomics", group:null },
+{ id:"quasi_public_goods", term:"Quasi-Public Goods", def:"Goods which may satisfy the two public good conditions (non-rivalry and non-excludability) only to a certain extent or only some of the time.", topic:"Microeconomics", group:null },
+{ id:"quotas", term:"Quotas", def:"Import barriers that set limits on the quantity or value of imports into a country.", topic:"International", group:"government_intervention" },
+
+// ── R ───────────────────────────────────────────────────────────────
+{ id:"rationing", term:"Rationing", def:"An artificial control on the distribution of scarce resources.", topic:"Microeconomics", group:null },
+{ id:"real_gdp_person", term:"Real GDP Per Person (Per Capita)", def:"Real GDP divided by the population of the country.", topic:"Development", group:"income_gdp" },
+{ id:"real_gni_person", term:"Real GNI Per Person (Per Capita)", def:"Real GNI divided by the population of the country.", topic:"Development", group:null },
+{ id:"real_interest_rates", term:"Real Interest Rates", def:"Interest rates that have been adjusted for inflation.", topic:"Macroeconomics", group:null },
+{ id:"real_price", term:"Real Price", def:"The nominal price of a good or service adjusted for inflation.", topic:"Macroeconomics", group:null },
+{ id:"recession", term:"Recession", def:"At least two consecutive quarters of negative economic growth.", topic:"Macroeconomics", group:null },
+{ id:"regressive_taxes", term:"Regressive Taxes", def:"Where the proportion of income paid in tax falls as the income of the taxpayer rises, or where the average rate of tax falls as income rises.", topic:"Macroeconomics", group:"tax_types" },
+{ id:"relative_poverty", term:"Relative Poverty", def:"A comparative measure of poverty. A person is said to be in relative poverty if they do not reach some specified level of income, for example, 50% of average earnings for the country.", topic:"Development", group:null },
+{ id:"remittances", term:"Remittances", def:"The transfer of money by foreign workers to individuals, often family members, in their home country.", topic:"Development", group:null },
+{ id:"reserve_assets", term:"Reserve Assets", def:"Foreign currencies and precious metals held by governments (central banks) as a result of international trade. Reserves may be held so that the government may maintain a desired exchange rate for the country's currencies.", topic:"International", group:null },
+{ id:"resource_allocation", term:"Resource Allocation", def:"Concerned with how resources (land, labour, capital and management) are distributed in an economy.", topic:"Microeconomics", group:null },
+{ id:"restricted_choices", term:"Restricted Choices", def:"When the choice of a consumer is restricted, but still exists.", topic:"Behavioral", group:"nudge_tools" },
+{ id:"revaluation", term:"Revaluation", def:"An increase in the value of a currency in a fixed exchange rate system.", topic:"International", group:null },
+{ id:"rivalrous", term:"Rivalrous", def:"Goods and services are considered to be rivalrous when the consumption by one person, or group of people, prevents others from consuming the good.", topic:"Microeconomics", group:null },
+{ id:"rules_of_thumb", term:"Rules of Thumb", def:"Mental shortcuts (heuristics) for decision-making to help people make a quick, satisfactory, but often not perfect, decision to a complex choice.", topic:"Behavioral", group:"nudge_tools" },
+
+// ── S ───────────────────────────────────────────────────────────────
+{ id:"satisficing", term:"Satisficing", def:"Occurs when entrepreneurs endeavour to cover their opportunity costs, but do not push themselves significantly further, even though they might be able to earn higher profits. It is essentially a mix of the words 'satisfy' and 'suffice'.", topic:"Behavioral", group:null },
+{ id:"says_law", term:"Say's Law", def:"States that the production of goods creates its own demand.", topic:"Macroeconomics", group:null },
+{ id:"scarcity", term:"Scarcity", def:"The limited availability of economic resources relative to society's unlimited demand for goods and services.", topic:"Microeconomics", group:null },
+{ id:"screening", term:"Screening", def:"The use of a screening process to gain more information regarding a participant in a transaction, in order to reduce asymmetric information, and so reduce adverse selection.", topic:"Microeconomics", group:null },
+{ id:"seasonal_unemployment", term:"Seasonal Unemployment", def:"Equilibrium unemployment that exists when people are out of work because their usual job is out of season, for example, a ski instructor in the summer.", topic:"Macroeconomics", group:"types_unemployment" },
+{ id:"sras", term:"Short-Run Aggregate Supply (SRAS)", def:"Aggregate supply that varies with the level of demand for goods and services and that is shifted by changes in the costs of factors of production.", topic:"Macroeconomics", group:null },
+{ id:"sr_phillips", term:"Short-Run Phillips Curve", def:"A curve showing the inverse relationship between the rate of unemployment and the rate of inflation, which suggests a trade-off between inflation and unemployment.", topic:"Macroeconomics", group:null },
+{ id:"signalling", term:"Signalling", def:"The sending of a signal revealing relevant information to a participant in a transaction in order to reduce asymmetric information, and so reduce adverse selection.", topic:"Microeconomics", group:null },
+{ id:"signalling_effect", term:"Signalling Effect", def:"Prices give a signal to both producers and consumers. A rising price signals producers to increase quantity supplied, and signals consumers to decrease the quantity demanded, and vice versa.", topic:"Microeconomics", group:null },
+{ id:"social_conformity", term:"Social Conformity", def:"The prevailing social norms or social customs will influence our daily behaviour and choice making.", topic:"Behavioral", group:"nudge_tools" },
+{ id:"social_enterprise", term:"Social Enterprise", def:"A company in the social economy whose main objective is to have a social impact rather than make a profit for owners or shareholders. It operates by providing goods and services for the market in an entrepreneurial and innovative fashion and uses its profits primarily to achieve social objectives.", topic:"Microeconomics", group:null },
+{ id:"social_safety_net", term:"Social Safety Net", def:"A collection of social welfare services provided by the state, or other institutions, targeted at vulnerable, resource-deprived households to prevent them from falling into poverty.", topic:"Development", group:null },
+{ id:"social_sciences", term:"Social Sciences", def:"Studies of people in society and how they interact with each other.", topic:"Microeconomics", group:null },
+{ id:"community_surplus", term:"Social/Community Surplus", def:"The combination of consumer surplus and producer surplus.", topic:"Microeconomics", group:null },
+{ id:"socially_optimum", term:"Socially Optimum Output", def:"Occurs where the marginal social cost of producing a good is equal to the marginal social benefit of the good to society — i.e. where the marginal cost (including external costs) equals the price charged to consumers. (P=MC)", topic:"Microeconomics", group:null },
+{ id:"stakeholder", term:"Stakeholder", def:"Someone who has an interest, or stake, in an economic activity.", topic:"Microeconomics", group:null },
+{ id:"standard_of_living", term:"Standard of Living", def:"The level of wealth, comfort, material goods, and necessity goods available to a certain socioeconomic class in a country.", topic:"Development", group:null },
+{ id:"structural_unemployment", term:"Structural Unemployment", def:"Long-term unemployment that occurs when there is a mismatch between the skills of unemployed workers and the jobs available, or a mismatch between the geographical location of workers and jobs available, or a permanent fall in the demand for a skill.", topic:"Macroeconomics", group:"types_unemployment" },
+{ id:"subsidy", term:"Subsidy", def:"A payment made by the government to producers in order to reduce the costs of production, increase output, protect producers from foreign imports, or reduce the price.", topic:"Microeconomics", group:"government_intervention" },
+{ id:"substitutes", term:"Substitutes", def:"Goods which can be used in place of each other. For example, Adidas running shoes and Nike running shoes.", topic:"Microeconomics", group:null },
+{ id:"supply", term:"Supply", def:"The willingness and ability of producers to produce a quantity of a good at a given price in a given time period.", topic:"Microeconomics", group:null },
+{ id:"supply_curve", term:"Supply Curve", def:"Shows the relationship between the price of a good or service and the quantity supplied. It is normally upward sloping.", topic:"Microeconomics", group:null },
+{ id:"supernormal_profits", term:"Supernormal Profits", def:"Refer to a situation where all costs, including opportunity cost, are more than covered by revenue — profits above the level sufficient to keep the firm in an industry.", topic:"Microeconomics", group:null },
+{ id:"supply_side_policies", term:"Supply-Side Policies", def:"Policies designed to shift the AS curve to the right. They may include tax cuts, reductions in welfare payments, promotion of training, etc.", topic:"Macroeconomics", group:null },
+{ id:"sustainability", term:"Sustainability", def:"Development that meets the needs of the present generation without compromising the ability of future generations to meet their needs.", topic:"Development", group:null },
+{ id:"sustainable_development", term:"Sustainable Development", def:"The development needed to meet the needs of the present generation without compromising the ability of future generations to meet their own needs.", topic:"Development", group:null },
+
+// ── T ───────────────────────────────────────────────────────────────
+{ id:"tariff", term:"Tariff", def:"A tax on imports to protect domestic industries from foreign competition and to raise revenue for the government.", topic:"International", group:"government_intervention" },
+{ id:"tastes", term:"Tastes", def:"The subjective, individual preferences of consumers.", topic:"Microeconomics", group:null },
+{ id:"terms_of_trade", term:"Terms of Trade Deterioration", def:"Where the average price of exports falls relative to the average price of imports, making it more expensive to buy imports in terms of exports that need to be sold.", topic:"International", group:null },
+{ id:"total_revenue", term:"Total Revenue", def:"The aggregate revenue gained by a firm from the sale of a particular quantity of output (equal to price times quantity sold).", topic:"Microeconomics", group:null },
+{ id:"trade_liberalisation", term:"Trade Liberalisation", def:"The process of reducing barriers to international trade.", topic:"International", group:null },
+{ id:"trade_protection", term:"Trade Protection", def:"An economic policy aiming to limit imports and/or encourage exports by setting up trade barriers.", topic:"International", group:null },
+{ id:"tradable_permits", term:"Tradable Permits", def:"Permits to pollute, issued by a governing body, which sets a maximum amount of pollution allowable. Firms may trade these permits for money.", topic:"Microeconomics", group:"government_intervention" },
+{ id:"tragedy_commons", term:"Tragedy of the Commons", def:"A situation with common access resources, where individual users acting independently according to their own self-interest deplete or spoil the resource through their collective action.", topic:"Microeconomics", group:null },
+
+// ── U ───────────────────────────────────────────────────────────────
+{ id:"un_sdgs", term:"UN Sustainable Development Goals (SDGs)", def:"A collection of 17 global goals set by the United Nations to mobilize efforts to end all forms of poverty, fight inequalities and tackle climate change, while ensuring that no one is left behind.", topic:"Development", group:null },
+{ id:"underemployment", term:"Underemployment", def:"When people are working but they are overqualified for the job they hold, or when people are employed part time but would like to work full time.", topic:"Macroeconomics", group:"types_unemployment" },
+{ id:"unemployment", term:"Unemployment", def:"People of working age (those in the labour force) actively seeking work at the current wage rate but cannot find one.", topic:"Macroeconomics", group:null },
+{ id:"unemployment_benefits", term:"Unemployment Benefits", def:"Payments, usually made by the government, to people who are unemployed (and actively seeking employment).", topic:"Macroeconomics", group:null },
+{ id:"unemployment_rate", term:"Unemployment Rate", def:"The number of workers without a job, who are willing and able to work, expressed as a percentage of the workforce.", topic:"Macroeconomics", group:null },
+{ id:"unitary_elastic_demand", term:"Unitary Elastic Demand", def:"Where a change in the price of a good or service leads to an equal and opposite proportional change in the quantity demanded. (PED would be equal to one.)", topic:"Microeconomics", group:"types_elasticity" },
+{ id:"unitary_elastic_supply", term:"Unitary Elastic Supply", def:"Where a change in the price of a good or service leads to an equal proportional change in the quantity supplied. (PES would be equal to one.)", topic:"Microeconomics", group:"types_elasticity" },
+{ id:"universal_basic_income", term:"Universal Basic Income", def:"A regular cash payment given to all on an individual basis, without means test or work requirement.", topic:"Development", group:null },
+{ id:"utility", term:"Utility", def:"A measure of the satisfaction derived from purchasing a good or service.", topic:"Microeconomics", group:null },
+
+// ── V ───────────────────────────────────────────────────────────────
+{ id:"variable_costs", term:"Variable Costs", def:"The costs of production that change as output changes (or increase as output increases).", topic:"Microeconomics", group:null },
+
+// ── W ───────────────────────────────────────────────────────────────
+{ id:"wage", term:"Wage", def:"The payment for labour/working.", topic:"Macroeconomics", group:null },
+{ id:"real_wage", term:"Real Wage", def:"The payment for labour/working adjusted for inflation.", topic:"Macroeconomics", group:null },
+{ id:"wealth", term:"Wealth", def:"The total value of all assets owned by a person, firm, community, or country.", topic:"Microeconomics", group:null },
+{ id:"weighted_price_index", term:"Weighted Price Index", def:"An approach to calculating the change in the price level by giving a weight to each item according to its importance in consumers' budgets.", topic:"Macroeconomics", group:null },
+{ id:"welfare_loss", term:"Welfare Loss", def:"A loss of economic efficiency that can occur when equilibrium for a good or service is not allocatively efficient.", topic:"Microeconomics", group:null },
+{ id:"world_bank", term:"World Bank", def:"An international organisation whose main aims are to provide aid and advice to developing countries, as well as reducing poverty levels.", topic:"Development", group:null },
+{ id:"wto", term:"World Trade Organization", def:"An international body that exists: to set and enforce rules for international trade; to provide a forum for negotiating trade liberalisation; to monitor further trade liberalisation; to resolve trade disputes; to increase the transparency of decision-making processes; to cooperate with other major international economic institutions; and to help developing countries benefit fully from the global trading system.", topic:"International", group:null },
+        ]; // end DEFS
+
+        // ═══════════════════════════════════════════════════
+        //  BACKGROUND CANVAS
+        // ═══════════════════════════════════════════════════
+        const bgC = document.getElementById("bg");
+        const bgX = bgC.getContext("2d");
+        function resizeBg() { bgC.width = window.innerWidth; bgC.height = window.innerHeight; drawBg(); }
+        function drawBg() {
+            bgX.clearRect(0, 0, bgC.width, bgC.height);
+            const sp = 40;
+            for (let x = sp/2; x < bgC.width; x += sp)
+                for (let y = sp/2; y < bgC.height; y += sp) {
+                    bgX.beginPath(); bgX.arc(x, y, 1, 0, Math.PI*2);
+                    bgX.fillStyle = "rgba(255,255,255,0.05)"; bgX.fill();
+                }
+        }
+
+        // ═══════════════════════════════════════════════════
+        //  CONFETTI
+        // ═══════════════════════════════════════════════════
+        const cfC = document.getElementById("confetti");
+        const cfX = cfC.getContext("2d");
+        let cfp = [];
+        function resizeCf() { cfC.width = window.innerWidth; cfC.height = window.innerHeight; }
+        function burst(x, y, n=40) {
+            const cols = ["#58a6ff","#bc8cff","#3fb950","#d29922","#f85149"];
+            for (let i = 0; i < n; i++) {
+                const a = Math.random()*Math.PI*2, s = 3+Math.random()*7;
+                cfp.push({ x, y, vx: Math.cos(a)*s, vy: Math.sin(a)*s-3,
+                    col: cols[Math.floor(Math.random()*cols.length)],
+                    life: 1, dec: 0.018+Math.random()*0.018,
+                    w: 4+Math.random()*5, h: 2+Math.random()*3,
+                    rot: Math.random()*Math.PI, rv: (Math.random()-0.5)*0.15 });
+            }
+        }
+        function animCf() {
+            cfX.clearRect(0, 0, cfC.width, cfC.height);
+            cfp = cfp.filter(p => p.life > 0);
+            cfp.forEach(p => {
+                p.x += p.vx; p.y += p.vy; p.vy += 0.25;
+                p.rot += p.rv; p.life -= p.dec;
+                cfX.save(); cfX.translate(p.x, p.y); cfX.rotate(p.rot);
+                cfX.globalAlpha = Math.max(0, p.life);
+                cfX.fillStyle = p.col;
+                cfX.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+                cfX.restore();
+            });
+            requestAnimationFrame(animCf);
+        }
+
+        // ═══════════════════════════════════════════════════
+        //  AUDIO
+        // ═══════════════════════════════════════════════════
+        let _ac = null;
+        function ac() { if (!_ac) _ac = new (window.AudioContext || window.webkitAudioContext)(); return _ac; }
+        function snd(type) {
+            try {
+                const c = ac(), now = c.currentTime;
+                const osc = c.createOscillator(), g = c.createGain();
+                osc.connect(g); g.connect(c.destination);
+                switch (type) {
+                    case "ok":
+                        osc.type = "sine";
+                        osc.frequency.setValueAtTime(440, now);
+                        osc.frequency.linearRampToValueAtTime(880, now+0.18);
+                        g.gain.setValueAtTime(0.25, now); g.gain.linearRampToValueAtTime(0, now+0.3);
+                        osc.start(now); osc.stop(now+0.3); break;
+                    case "no":
+                        osc.type = "sawtooth";
+                        osc.frequency.setValueAtTime(280, now);
+                        osc.frequency.linearRampToValueAtTime(140, now+0.22);
+                        g.gain.setValueAtTime(0.18, now); g.gain.linearRampToValueAtTime(0, now+0.28);
+                        osc.start(now); osc.stop(now+0.28); break;
+                    case "lvl": {
+                        [523,659,784,1047].forEach((f,i) => {
+                            const o = c.createOscillator(), g2 = c.createGain();
+                            o.connect(g2); g2.connect(c.destination);
+                            o.type = "sine";
+                            o.frequency.setValueAtTime(f, now+i*0.1);
+                            g2.gain.setValueAtTime(0.2, now+i*0.1);
+                            g2.gain.linearRampToValueAtTime(0, now+i*0.1+0.2);
+                            o.start(now+i*0.1); o.stop(now+i*0.1+0.3);
+                        }); break;
+                    }
+                    case "str":
+                        osc.type = "triangle";
+                        osc.frequency.setValueAtTime(600, now);
+                        osc.frequency.linearRampToValueAtTime(900, now+0.12);
+                        g.gain.setValueAtTime(0.2, now); g.gain.linearRampToValueAtTime(0, now+0.2);
+                        osc.start(now); osc.stop(now+0.2); break;
+                    case "tick":
+                        osc.type = "sine";
+                        osc.frequency.setValueAtTime(700, now);
+                        g.gain.setValueAtTime(0.04, now); g.gain.linearRampToValueAtTime(0, now+0.05);
+                        osc.start(now); osc.stop(now+0.05); break;
+                }
+            } catch(e) {}
+        }
+
+        // ═══════════════════════════════════════════════════
+        //  GAME STATE
+        // ═══════════════════════════════════════════════════
+        const HS_KEYS = { term:"eco_hs_term", definition:"eco_hs_definition", category:"eco_hs_category" };
+        const GS = {
+            mode: "term",
+            activeTopics: new Set(),
+            score: 0, lives: 3, level: 1, streak: 0, maxStreak: 0,
+            correctInLevel: 0, totalCorrect: 0, totalQ: 0,
+            missed: [],
+            running: false,
+            timeMax: 10, timeLeft: 10, timerId: null, answered: false,
+            curDef: null, curGroup: null, lastChosenTerm: null,
+        };
+        function getHS(mode) { return parseInt(localStorage.getItem(HS_KEYS[mode]) || "0"); }
+        function setHS(mode, val) { localStorage.setItem(HS_KEYS[mode], val); }
+
+        // ═══════════════════════════════════════════════════
+        //  TOPIC CHIPS
+        // ═══════════════════════════════════════════════════
+        const TOPIC_LIST = ["Microeconomics","Macroeconomics","International","Development","Behavioral"];
+
+        function initChips() {
+            const c = document.getElementById("chips");
+            c.innerHTML = "";
+            const all = document.createElement("div");
+            all.className = "chip on"; all.textContent = "All Topics"; all.dataset.t = "ALL";
+            all.onclick = () => { document.querySelectorAll(".chip").forEach(x=>x.classList.remove("on")); GS.activeTopics.clear(); all.classList.add("on"); };
+            c.appendChild(all);
+            TOPIC_LIST.forEach(t => {
+                const ch = document.createElement("div");
+                ch.className = "chip"; ch.textContent = t; ch.dataset.t = t;
+                ch.onclick = () => {
+                    c.querySelector('[data-t="ALL"]').classList.remove("on");
+                    GS.activeTopics.has(t) ? (GS.activeTopics.delete(t), ch.classList.remove("on"))
+                                           : (GS.activeTopics.add(t),    ch.classList.add("on"));
+                    if (!GS.activeTopics.size) c.querySelector('[data-t="ALL"]').classList.add("on");
+                };
+                c.appendChild(ch);
+            });
+        }
+
+        function poolDefs() {
+            if (!GS.activeTopics.size) return DEFS;
+            return DEFS.filter(d => GS.activeTopics.has(d.topic));
+        }
+        function poolCategoryDefs() {
+            return poolDefs().filter(d => d.group !== null);
+        }
+        function getGroupsInPool() {
+            const catPool = poolCategoryDefs();
+            const groups = [...new Set(catPool.map(d => d.group))];
+            return groups.filter(g => {
+                const inGroup = catPool.filter(d => d.group === g);
+                const outGroup = catPool.filter(d => d.group !== g);
+                return inGroup.length >= 1 && outGroup.length >= 3;
+            });
+        }
+
+        // ═══════════════════════════════════════════════════
+        //  HIGH SCORE DISPLAY
+        // ═══════════════════════════════════════════════════
+        function renderHSRow() {
+            const r = document.getElementById("hs-row");
+            r.innerHTML = "";
+            const labels = { term:"Term Match", definition:"Definition Match", category:"Category Match" };
+            ["term","definition","category"].forEach(m => {
+                const d = document.createElement("div");
+                d.className = "hs-card";
+                d.innerHTML = `<div class="hs-mode">${labels[m]}</div><div class="hs-val">${getHS(m).toLocaleString()}</div>`;
+                r.appendChild(d);
+            });
+        }
+
+        // ═══════════════════════════════════════════════════
+        //  SCREENS & MODE SELECT
+        // ═══════════════════════════════════════════════════
+        function showScreen(id) {
+            document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+            document.getElementById(id).classList.add("active");
+        }
+        function selectMode(m) {
+            GS.mode = m;
+            document.querySelectorAll(".mode-card").forEach(c => c.classList.toggle("selected", c.dataset.mode === m));
+        }
+
+        // ═══════════════════════════════════════════════════
+        //  START
+        // ═══════════════════════════════════════════════════
+        function startGame() {
+            Object.assign(GS, {
+                score:0, lives:3, level:1, streak:0, maxStreak:0,
+                correctInLevel:0, totalCorrect:0, totalQ:0,
+                missed:[], running:true, timeMax:10, answered:false,
+                curDef:null, curGroup:null, lastChosenTerm:null,
+            });
+            updateHUD();
+            showScreen("game-screen");
+            nextQ();
+        }
+
+        // ═══════════════════════════════════════════════════
+        //  HUD
+        // ═══════════════════════════════════════════════════
+        function mult() {
+            if (GS.streak >= 10) return 10;
+            if (GS.streak >= 6)  return 5;
+            if (GS.streak >= 3)  return 2;
+            return 1;
+        }
+        function updateHUD() {
+            const lv = document.getElementById("lives");
+            lv.innerHTML = "";
+            for (let i = 0; i < 3; i++) {
+                const h = document.createElement("div");
+                h.className = "heart" + (i >= GS.lives ? " lost" : "");
+                h.textContent = "♥"; lv.appendChild(h);
+            }
+            document.getElementById("hud-score").textContent = GS.score.toLocaleString();
+            document.getElementById("hud-level").textContent = GS.level;
+            const sb = document.getElementById("streak-badge");
+            sb.textContent = `×${mult()}`;
+            sb.className = "streak-badge" + (GS.streak >= 6 ? " fire" : "");
+            document.getElementById("xp-fill").style.width = (GS.correctInLevel/10)*100 + "%";
+            document.getElementById("xp-lbl").textContent = `${GS.correctInLevel}/10 to next level`;
+        }
+
+        // ═══════════════════════════════════════════════════
+        //  QUESTIONS
+        // ═══════════════════════════════════════════════════
+        function nextQ() {
+            if (!GS.running) return;
+            stopTimer();
+            GS.answered = false;
+
+            const pool = poolDefs();
+            if (pool.length < 4) { alert("Select topics with ≥4 definitions."); showScreen("start-screen"); return; }
+
+            if (GS.mode === "category") {
+                const groups = getGroupsInPool();
+                if (groups.length === 0) { alert("Not enough grouped entries for Category mode in the selected topics."); showScreen("start-screen"); return; }
+                buildCategory(groups);
+            } else {
+                const def = pool[Math.floor(Math.random() * pool.length)];
+                GS.curDef = def;
+                GS.totalQ++;
+                document.getElementById("tag-topic").textContent = def.topic;
+                document.getElementById("q-num").textContent = `Q${GS.totalQ}`;
+                if (GS.mode === "term") buildTerm(def, pool);
+                else buildDefinition(def, pool);
+            }
+            startTimer();
+        }
+
+        // ── Term mode: show definition → pick term ────────
+        function buildTerm(def, pool) {
+            document.getElementById("tag-mode").textContent = "Term Match";
+            document.getElementById("q-prompt").textContent = "Which term matches this definition?";
+            document.getElementById("q-content").innerHTML = `<div class="def-text">${def.def}</div>`;
+            const others = shuffle(pool.filter(d => d.id !== def.id)).slice(0, 3);
+            const opts = shuffle([def, ...others]);
+            buildOpts(opts, o => o.id === def.id,
+                o => `<span class="opt-body">${o.term}</span>`,
+                o => o.term);
+        }
+
+        // ── Definition mode: show term → pick definition ──
+        function buildDefinition(def, pool) {
+            document.getElementById("tag-mode").textContent = "Definition Match";
+            document.getElementById("q-prompt").textContent = "Which definition matches this term?";
+            document.getElementById("q-content").innerHTML =
+                `<div class="def-term">${def.term}</div><div class="def-topic">${def.topic}</div>`;
+            // prefer same-topic distractors
+            const sameT = pool.filter(d => d.id !== def.id && d.topic === def.topic);
+            const diffT = pool.filter(d => d.id !== def.id && d.topic !== def.topic);
+            const distractors = shuffle([...sameT, ...diffT]).slice(0, 3);
+            const opts = shuffle([def, ...distractors]);
+            buildOpts(opts, o => o.id === def.id,
+                o => `<span class="opt-body">${truncateDef(o.def)}</span>`,
+                o => o.term);
+        }
+
+        // ── Category mode: show group → pick the term ─────
+        function buildCategory(groups) {
+            const group = groups[Math.floor(Math.random() * groups.length)];
+            GS.curGroup = group;
+            const catPool = poolCategoryDefs();
+            const inGroup  = catPool.filter(d => d.group === group);
+            const outGroup = catPool.filter(d => d.group !== group);
+            const correct  = inGroup[Math.floor(Math.random() * inGroup.length)];
+            GS.curDef = correct;
+            GS.totalQ++;
+            const distractors = shuffle(outGroup).slice(0, 3);
+            const opts = shuffle([correct, ...distractors]);
+            document.getElementById("tag-mode").textContent = "Category Match";
+            document.getElementById("tag-topic").textContent = correct.topic;
+            document.getElementById("q-num").textContent = `Q${GS.totalQ}`;
+            document.getElementById("q-prompt").textContent = "Which term belongs to this category?";
+            document.getElementById("q-content").innerHTML =
+                `<div class="cat-group-label">${formatGroupLabel(group)}</div>`;
+            buildOpts(opts, o => o.id === correct.id,
+                o => `<span class="opt-body">${o.term}</span>`,
+                o => o.term);
+        }
+
+        // ── Shared option builder ─────────────────────────
+        const LETTERS = ["A","B","C","D"];
+        function buildOpts(opts, isCorrect, render, getChosenTerm) {
+            const g = document.getElementById("opts");
+            g.innerHTML = "";
+            opts.forEach((o, i) => {
+                const b = document.createElement("button");
+                b.className = "opt";
+                b.innerHTML = `<span class="opt-letter">${LETTERS[i]}</span>${render(o)}`;
+                b.onclick = () => pickOpt(b, isCorrect(o), () => {
+                    g.querySelectorAll(".opt").forEach((btn, j) => {
+                        if (isCorrect(opts[j])) btn.classList.add("correct");
+                    });
+                }, getChosenTerm ? getChosenTerm(o) : null);
+                g.appendChild(b);
+            });
+        }
+
+        function pickOpt(clickedBtn, isCorrect, revealFn, chosenTerm) {
+            if (GS.answered) return;
+            GS.answered = true;
+            GS.lastChosenTerm = chosenTerm || null;
+            stopTimer();
+            document.querySelectorAll("#opts .opt").forEach(b => b.disabled = true);
+            revealFn();
+            if (!isCorrect) clickedBtn.classList.add("wrong");
+            resolveResult(isCorrect);
+        }
+
+        // ═══════════════════════════════════════════════════
+        //  RESULT
+        // ═══════════════════════════════════════════════════
+        function resolveResult(isCorrect) {
+            if (isCorrect) {
+                GS.streak++; GS.correctInLevel++; GS.totalCorrect++;
+                if (GS.streak > GS.maxStreak) GS.maxStreak = GS.streak;
+                const m = mult();
+                const tb = Math.max(0, GS.timeLeft / GS.timeMax);
+                const pts = Math.max(10, Math.round(100 * tb * m));
+                GS.score += pts;
+                snd("ok");
+                flash("rgba(63,185,80,.08)");
+                showFeedback(`+${pts}`, "good");
+                scorePop(`+${pts}`, "#3fb950");
+                if (GS.streak === 3 || GS.streak === 6 || GS.streak === 10) { comboShow(); snd("str"); }
+                if (GS.correctInLevel >= 10) {
+                    GS.correctInLevel = 0; GS.level++;
+                    GS.timeMax = Math.max(4, 10 - (GS.level-1) * 0.5);
+                    lvlUpFx(); snd("lvl");
+                }
+            } else {
+                GS.streak = 0; GS.lives--;
+                if (!GS.missed.find(x => x.def.id === GS.curDef.id)) {
+                    GS.missed.push({
+                        def: GS.curDef,
+                        chosenTerm: GS.lastChosenTerm,
+                        correctTerm: GS.curDef.term,
+                        timedOut: false,
+                        mode: GS.mode,
+                        groupKey: GS.curGroup,
+                    });
+                }
+                snd("no");
+                flash("rgba(248,81,73,.1)");
+                shakeScreen();
+                showFeedback("Wrong — " + GS.curDef.term, "bad");
+                if (GS.lives <= 0) { updateHUD(); setTimeout(gameOver, 800); return; }
+            }
+            updateHUD();
+            setTimeout(() => { if (GS.running) nextQ(); }, isCorrect ? 550 : 900);
+        }
+
+        // ═══════════════════════════════════════════════════
+        //  TIMER
+        // ═══════════════════════════════════════════════════
+        function startTimer() {
+            GS.timeLeft = GS.timeMax;
+            renderTimerBar();
+            GS.timerId = setInterval(() => {
+                GS.timeLeft -= 0.1;
+                renderTimerBar();
+                if (GS.timeLeft <= 3 && GS.timeLeft > 0 && Math.floor(GS.timeLeft*10) % 4 === 0) snd("tick");
+                if (GS.timeLeft <= 0) { stopTimer(); if (!GS.answered) timeout(); }
+            }, 100);
+        }
+        function stopTimer() {
+            if (GS.timerId) { clearInterval(GS.timerId); GS.timerId = null; }
+        }
+        function renderTimerBar() {
+            const pct = Math.max(0, (GS.timeLeft / GS.timeMax) * 100);
+            const f = document.getElementById("time-fill");
+            f.style.width = pct + "%";
+            f.style.background = pct > 50 ? "var(--green)" : pct > 25 ? "var(--yellow)" : "var(--red)";
+        }
+        function timeout() {
+            GS.answered = true; GS.timeLeft = 0;
+            document.querySelectorAll("#opts .opt").forEach(b => b.disabled = true);
+            GS.streak = 0; GS.lives--;
+            if (!GS.missed.find(x => x.def.id === GS.curDef.id)) {
+                GS.missed.push({ def: GS.curDef, chosenTerm: null, correctTerm: GS.curDef.term,
+                    timedOut: true, mode: GS.mode, groupKey: GS.curGroup });
+            }
+            snd("no"); flash("rgba(248,81,73,.1)"); shakeScreen();
+            showFeedback("Time's up — " + GS.curDef.term, "bad");
+            updateHUD();
+            if (GS.lives <= 0) { setTimeout(gameOver, 800); return; }
+            setTimeout(() => { if (GS.running) nextQ(); }, 900);
+        }
+
+        // ═══════════════════════════════════════════════════
+        //  EFFECTS
+        // ═══════════════════════════════════════════════════
+        function flash(col) {
+            const f = document.getElementById("flash");
+            f.style.background = col; f.style.opacity = "1";
+            setTimeout(() => f.style.opacity = "0", 180);
+        }
+        function shakeScreen() {
+            const g = document.getElementById("game-screen");
+            g.classList.remove("shaking"); void g.offsetWidth; g.classList.add("shaking");
+        }
+        function showFeedback(msg, type) {
+            const f = document.getElementById("feedback");
+            f.textContent = msg; f.className = `feedback ${type} show`;
+            setTimeout(() => f.classList.remove("show"), 1800);
+        }
+        function scorePop(txt, col) {
+            const el = document.createElement("div");
+            el.className = "score-pop"; el.textContent = txt; el.style.color = col;
+            el.style.left = (window.innerWidth/2 - 30) + "px";
+            el.style.top  = (window.innerHeight/2 - 40) + "px";
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 1000);
+        }
+        function comboShow() {
+            const m = mult();
+            const labels = { 2:"Double!", 5:"Combo ×5!", 10:"Insane ×10!" };
+            const cols   = { 2:"#3fb950", 5:"#d29922", 10:"#db6d28" };
+            const p = document.getElementById("combo-pop");
+            p.textContent = (labels[m] || `×${m}`) + "  🔥";
+            p.style.color = cols[m] || "#58a6ff";
+            p.classList.add("show");
+            burst(window.innerWidth/2, window.innerHeight/2, 28);
+            setTimeout(() => p.classList.remove("show"), 1000);
+        }
+        function lvlUpFx() {
+            const o = document.getElementById("lvlup-overlay");
+            document.getElementById("lvlup-text").textContent = `Level ${GS.level}!`;
+            o.style.opacity = "1";
+            burst(window.innerWidth/2, window.innerHeight/3, 55);
+            setTimeout(() => o.style.opacity = "0", 1600);
+        }
+
+        // ═══════════════════════════════════════════════════
+        //  GLOBAL XP / STREAK REPORTING
+        // ═══════════════════════════════════════════════════
+        function reportToGlobal(score) {
+            const xp = parseInt(localStorage.getItem("ibq_xp") || "0") + score;
+            localStorage.setItem("ibq_xp", xp);
+            const today = new Date().toISOString().slice(0,10);
+            const last  = localStorage.getItem("ibq_streak_date") || "";
+            const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
+            let streak = parseInt(localStorage.getItem("ibq_streak_count") || "0");
+            if (last === today) { /* no change */ }
+            else if (last === yesterday) { streak++; }
+            else { streak = 1; }
+            localStorage.setItem("ibq_streak_date", today);
+            localStorage.setItem("ibq_streak_count", streak);
+        }
+
+        // ═══════════════════════════════════════════════════
+        //  GAME OVER
+        // ═══════════════════════════════════════════════════
+        function gameOver() {
+            reportToGlobal(GS.score);
+            GS.running = false; stopTimer();
+            const prev = getHS(GS.mode);
+            const isNew = GS.score > prev;
+            if (isNew) setHS(GS.mode, GS.score);
+
+            const acc = GS.totalQ > 0 ? Math.round((GS.totalCorrect / GS.totalQ) * 100) : 0;
+            const t = document.getElementById("go-title");
+            const s = document.getElementById("go-sub");
+            if (acc >= 80) { t.textContent = "Excellent!"; t.className = "go-title win"; s.textContent = `${acc}% accuracy — economics master!`; }
+            else           { t.textContent = "Game Over"; t.className = "go-title";     s.textContent = `${acc}% accuracy — keep revising!`; }
+
+            document.getElementById("go-score").textContent  = GS.score.toLocaleString();
+            document.getElementById("go-level").textContent  = GS.level;
+            document.getElementById("go-correct").textContent = GS.totalCorrect;
+            document.getElementById("go-streak").textContent = GS.maxStreak;
+            document.getElementById("new-record").style.display = isNew ? "block" : "none";
+
+            const ms = document.getElementById("missed");
+            ms.innerHTML = "";
+            if (GS.missed.length) {
+                ms.innerHTML = '<div class="missed-lbl">Missed Questions</div>';
+                GS.missed.slice(0, 6).forEach(m => {
+                    const d = document.createElement("div");
+                    d.className = "missed-item";
+                    let html = `<div class="mi-name">${m.correctTerm}</div>`;
+                    if (m.timedOut) {
+                        html += `<div class="missed-row"><span class="mi-label timeout">Timed out</span>`;
+                        if (m.mode === "category")
+                            html += `<span class="mi-text" style="color:var(--text3)">${formatGroupLabel(m.groupKey)}</span></div>`;
+                        else
+                            html += `<span class="mi-text" style="color:var(--text3)">${truncateDef(m.def.def, 120)}</span></div>`;
+                    } else if (m.mode === "term") {
+                        if (m.chosenTerm) html += `<div class="missed-row"><span class="mi-label chosen">You chose</span><span class="mi-text" style="color:var(--red)">${m.chosenTerm}</span></div>`;
+                        html += `<div class="missed-row"><span class="mi-label correct">Correct</span><span class="mi-text" style="color:var(--green)">${m.correctTerm}</span></div>`;
+                        html += `<div class="missed-row" style="margin-top:4px"><span style="font-size:.68rem;color:var(--text3);flex-shrink:0">Definition:</span><span class="mi-text" style="margin-left:8px;color:var(--text2)">${truncateDef(m.def.def, 120)}</span></div>`;
+                    } else if (m.mode === "definition") {
+                        html += `<div class="missed-row"><span class="mi-label correct">Correct def.</span><span class="mi-text" style="color:var(--green)">${truncateDef(m.def.def, 140)}</span></div>`;
+                        if (m.chosenTerm) {
+                            const chosenDef = DEFS.find(x => x.term === m.chosenTerm);
+                            if (chosenDef) html += `<div class="missed-row"><span class="mi-label chosen">You chose</span><span class="mi-text" style="color:var(--red)">${truncateDef(chosenDef.def, 140)}</span></div>`;
+                        }
+                    } else { // category
+                        if (m.chosenTerm) html += `<div class="missed-row"><span class="mi-label chosen">You chose</span><span class="mi-text" style="color:var(--red)">${m.chosenTerm}</span></div>`;
+                        html += `<div class="missed-row"><span class="mi-label correct">Correct</span><span class="mi-text" style="color:var(--green)">${m.correctTerm}</span></div>`;
+                        html += `<div class="missed-row" style="margin-top:4px"><span style="font-size:.68rem;color:var(--text3);flex-shrink:0">Category:</span><span class="mi-text" style="margin-left:8px;color:var(--accent)">${formatGroupLabel(m.groupKey)}</span></div>`;
+                    }
+                    d.innerHTML = html;
+                    ms.appendChild(d);
+                });
+            }
+            if (isNew) burst(window.innerWidth/2, window.innerHeight/4, 70);
+            renderHSRow();
+            showScreen("go-screen");
+        }
+
+        // ═══════════════════════════════════════════════════
+        //  UTILS
+        // ═══════════════════════════════════════════════════
+        function shuffle(a) {
+            const r = [...a];
+            for (let i = r.length-1; i > 0; i--) {
+                const j = Math.floor(Math.random()*(i+1));
+                [r[i], r[j]] = [r[j], r[i]];
+            }
+            return r;
+        }
+        function truncateDef(text, max=200) {
+            return text.length <= max ? text : text.slice(0, max).replace(/\s\S*$/, "") + "…";
+        }
+        function formatGroupLabel(key) {
+            const map = {
+                types_unemployment:    "Types of Unemployment",
+                trade_blocs:           "Trade Blocs",
+                development_indicators:"Development Indicators",
+                types_elasticity:      "Types of Elasticity",
+                balance_of_payments:   "Balance of Payments Components",
+                market_structures:     "Market Structures",
+                types_externalities:   "Types of Externalities",
+                types_aid:             "Types of Aid",
+                behavioral_biases:     "Behavioural Biases",
+                nudge_tools:           "Nudge Tools",
+                types_inflation:       "Types of Inflation/Deflation",
+                income_gdp:            "Income & GDP Measures",
+                tax_types:             "Types of Tax",
+                government_intervention:"Government Intervention Tools",
+                factors_production:    "Factors of Production",
+                oligopoly_types:       "Types of Oligopoly",
+                exchange_rate_systems: "Exchange Rate Systems",
+                economic_systems:      "Economic Systems",
+            };
+            return map[key] || key.replace(/_/g," ").replace(/\b\w/g, c => c.toUpperCase());
+        }
+
+        // ═══════════════════════════════════════════════════
+        //  INIT
+        // ═══════════════════════════════════════════════════
+        function initApp() {
+            resizeBg(); resizeCf(); initChips(); renderHSRow(); animCf();
+            window.addEventListener("resize", () => { resizeBg(); resizeCf(); });
+        }
+
+        document.addEventListener("DOMContentLoaded", initApp);
+        </script>
+    </body>
+</html>
