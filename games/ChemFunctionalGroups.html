@@ -1,0 +1,1991 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Chem Groups</title>
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"
+        />
+        <script
+            defer
+            src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"
+        ></script>
+        <script
+            defer
+            src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+            onload="initApp()"
+        ></script>
+        <link rel="stylesheet" href="../styles.css" />
+        <style>
+            /* ── START SCREEN ────────────────────────── */
+            #start-screen {
+                gap: 20px;
+            }
+
+            .wordmark {
+                font-size: clamp(2.6rem, 8vw, 4rem);
+                font-weight: 800;
+                letter-spacing: -1px;
+                color: var(--text);
+            }
+            .wordmark span {
+                color: var(--accent);
+            }
+
+            .back-btn {
+                position: absolute;
+                top: 20px;
+                left: 20px;
+                font-size: 1.2rem;
+                color: white;
+                text-decoration: none;
+                z-index: 100;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                font-weight: 600;
+                transition: opacity 0.15s;
+            }
+            .back-btn:hover {
+                opacity: 0.7;
+            }
+
+            .hs-row {
+                display: flex;
+                gap: 12px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .hs-card {
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: 4px;
+                padding: 10px 18px;
+                text-align: center;
+                min-width: 130px;
+            }
+            .hs-card .hs-mode {
+                font-size: 0.68rem;
+                color: var(--text3);
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                margin-bottom: 2px;
+            }
+            .hs-card .hs-val {
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: var(--accent);
+            }
+
+            .mode-grid {
+                display: flex;
+                gap: 12px;
+                flex-wrap: wrap;
+                justify-content: center;
+                max-width: 700px;
+                width: 100%;
+            }
+            .mode-card {
+                flex: 1;
+                min-width: 150px;
+                max-width: 220px;
+                background: var(--surface);
+                border: 2px solid var(--border);
+                border-radius: 4px;
+                padding: 16px 18px;
+                cursor: pointer;
+                transition:
+                    border-color 0.15s,
+                    background 0.15s;
+                text-align: center;
+            }
+            .mode-card:hover {
+                border-color: var(--text3);
+                background: #202020;
+            }
+            .mode-card.selected {
+                border-color: var(--accent);
+                background: #1e1e2e;
+            }
+            .mode-title {
+                font-size: 0.95rem;
+                font-weight: 600;
+                color: var(--text);
+            }
+
+            .filter-box {
+                max-width: 700px;
+                width: 100%;
+                max-height: 30vh;
+                overflow-y: auto;
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: 4px;
+                padding: 14px 18px;
+            }
+            .filter-label {
+                font-size: 0.68rem;
+                color: var(--text3);
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                margin-bottom: 10px;
+            }
+            .chips {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+            .chip {
+                padding: 5px 12px;
+                border-radius: 3px;
+                border: 1px solid var(--border);
+                background: transparent;
+                font-size: 0.74rem;
+                cursor: pointer;
+                color: var(--text2);
+                transition: all 0.15s;
+            }
+            .chip:hover {
+                border-color: var(--text2);
+                color: var(--text);
+            }
+            .chip.on {
+                background: rgba(176, 173, 255, 0.12);
+                border-color: var(--accent);
+                color: var(--accent);
+            }
+
+            /* ── GAME SCREEN ─────────────────────────── */
+            #game-screen {
+                padding: 0;
+                justify-content: flex-start;
+                overflow: hidden;
+            }
+
+            .game-top {
+                width: 100%;
+                flex-shrink: 0;
+                background: var(--surface);
+                border-bottom: 1px solid var(--border);
+                padding: 10px 20px 0;
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                position: relative;
+                z-index: 20;
+            }
+            .game-hud {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                flex-wrap: wrap;
+            }
+
+            .lives {
+                display: flex;
+                gap: 5px;
+            }
+            .heart {
+                font-size: 1.2rem;
+                transition: opacity 0.3s;
+            }
+            .heart.lost {
+                opacity: 0.2;
+            }
+
+            .hud-group {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            .hud-lbl {
+                font-size: 0.6rem;
+                color: var(--text3);
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+            }
+            .hud-val {
+                font-size: 1.2rem;
+                font-weight: 700;
+            }
+            .hud-val.c-score {
+                color: var(--accent);
+            }
+            .hud-val.c-level {
+                color: var(--text2);
+            }
+
+            .streak-badge {
+                padding: 3px 12px;
+                border-radius: 3px;
+                font-size: 0.82rem;
+                font-weight: 700;
+                border: 1px solid var(--yellow);
+                color: var(--yellow);
+                background: rgba(201, 146, 42, 0.08);
+            }
+            .streak-badge.fire {
+                border-color: var(--orange);
+                color: var(--orange);
+                background: rgba(219, 109, 40, 0.12);
+                animation: fpulse 0.6s ease-in-out infinite alternate;
+            }
+
+            .ml-auto {
+                margin-left: auto;
+            }
+
+            .time-track {
+                height: 4px;
+                background: var(--border2);
+                border-radius: 2px;
+                overflow: hidden;
+            }
+            .time-fill {
+                height: 100%;
+                border-radius: 2px;
+                transition:
+                    width 0.1s linear,
+                    background 0.4s;
+                background: var(--green);
+            }
+
+            .xp-track {
+                height: 2px;
+                background: var(--border2);
+                border-radius: 1px;
+                overflow: hidden;
+                margin-top: 2px;
+            }
+            .xp-fill {
+                height: 100%;
+                border-radius: 1px;
+                background: var(--purple);
+                transition: width 0.4s ease;
+            }
+            .xp-lbl {
+                font-size: 0.6rem;
+                color: var(--text3);
+                margin-top: 1px;
+                padding-bottom: 6px;
+            }
+
+            /* ── QUESTION AREA ───────────────────────── */
+            .game-body {
+                flex: 1;
+                width: 100%;
+                overflow-y: auto;
+                padding: 16px 20px 20px;
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+                max-width: 800px;
+                margin: 0 auto;
+                align-self: stretch;
+            }
+            .game-body-wrap {
+                flex: 1;
+                width: 100%;
+                overflow-y: auto;
+                display: flex;
+                justify-content: center;
+            }
+
+            .q-meta {
+                display: flex;
+                gap: 8px;
+                align-items: center;
+                flex-wrap: wrap;
+            }
+            .tag {
+                padding: 3px 10px;
+                border-radius: 3px;
+                font-size: 0.68rem;
+                letter-spacing: 0.06em;
+                border: 1px solid;
+            }
+            .tag-mode {
+                border-color: rgba(176, 173, 255, 0.35);
+                color: var(--accent);
+                background: rgba(176, 173, 255, 0.06);
+            }
+            .tag-topic {
+                border-color: var(--border);
+                color: var(--text2);
+                background: transparent;
+            }
+            .q-num {
+                font-size: 0.68rem;
+                color: var(--text3);
+                margin-left: auto;
+            }
+
+            .question-card {
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: 4px;
+                padding: 22px 22px 18px;
+                position: relative;
+            }
+            .q-prompt {
+                font-size: 0.72rem;
+                color: var(--text3);
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                margin-bottom: 12px;
+            }
+
+            .eq-large {
+                font-size: clamp(1.1rem, 3vw, 1.6rem);
+                overflow-x: auto;
+            }
+            .eq-large .katex-display {
+                margin: 0;
+            }
+            .katex {
+                font-size: 1em !important;
+            }
+
+            .sym-question {
+                margin-top: 12px;
+                font-size: 0.88rem;
+                color: var(--text2);
+            }
+            .sym-question .sym-hl {
+                color: var(--accent);
+                font-weight: 700;
+                border-bottom: 2px solid var(--accent);
+                padding-bottom: 1px;
+            }
+
+            .scenario-hint {
+                margin-top: 10px;
+                font-size: 0.8rem;
+                color: var(--text3);
+                font-style: italic;
+            }
+
+            /* ── OPTIONS ─────────────────────────────── */
+            .options-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            @media (max-width: 520px) {
+                .options-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            .opt {
+                padding: 14px 16px;
+                border-radius: 4px;
+                border: 1px solid var(--border);
+                background: var(--surface);
+                color: var(--text);
+                font-size: 0.9rem;
+                font-family: inherit;
+                cursor: pointer;
+                text-align: left;
+                line-height: 1.5;
+                transition:
+                    border-color 0.12s,
+                    background 0.12s,
+                    transform 0.1s;
+                display: flex;
+                align-items: flex-start;
+                gap: 10px;
+                overflow: hidden;
+            }
+            .opt:hover:not(:disabled) {
+                border-color: var(--accent);
+                background: #1e1e2e;
+                transform: translateY(-1px);
+            }
+            .opt:active:not(:disabled) {
+                transform: none;
+            }
+            .opt:disabled {
+                cursor: default;
+            }
+            .opt.correct {
+                border-color: var(--green) !important;
+                background: rgba(76, 175, 110, 0.1) !important;
+                color: var(--green);
+            }
+            .opt.wrong {
+                border-color: var(--red) !important;
+                background: rgba(224, 82, 82, 0.08) !important;
+                color: var(--red);
+            }
+            .opt.picked {
+                border-color: var(--accent);
+                background: rgba(176, 173, 255, 0.1);
+            }
+
+            .opt-letter {
+                width: 22px;
+                height: 22px;
+                border-radius: 3px;
+                background: var(--border2);
+                color: var(--text3);
+                font-size: 0.72rem;
+                font-weight: 700;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+                margin-top: 1px;
+            }
+            .opt-body {
+                flex: 1;
+                overflow: hidden;
+            }
+            .opt-eq-name {
+                font-size: 0.68rem;
+                color: var(--text3);
+                margin-top: 4px;
+            }
+
+            .opt .katex-display {
+                margin: 0;
+            }
+            .opt .katex {
+                font-size: 0.95em !important;
+            }
+
+            .submit-btn {
+                align-self: center;
+                padding: 11px 36px;
+                background: var(--accent);
+                color: #0c0c18;
+                border: none;
+                border-radius: 3px;
+                font-size: 0.9rem;
+                font-weight: 700;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+                cursor: pointer;
+                display: none;
+                transition: opacity 0.15s;
+            }
+            .submit-btn:hover {
+                opacity: 0.85;
+            }
+
+            /* ── GAME OVER SCREEN ────────────────────── */
+            .go-card {
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: 4px;
+                padding: 36px 32px;
+                max-width: 560px;
+                width: 100%;
+                text-align: center;
+            }
+            .go-title {
+                font-size: 2rem;
+                font-weight: 800;
+                color: var(--red);
+                margin-bottom: 4px;
+            }
+            .go-title.win {
+                color: var(--yellow);
+            }
+            .go-sub {
+                font-size: 0.85rem;
+                color: var(--text2);
+                margin-bottom: 24px;
+            }
+
+            .stats-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+                margin-bottom: 20px;
+            }
+            .stat {
+                background: var(--bg);
+                border: 1px solid var(--border2);
+                border-radius: 3px;
+                padding: 14px;
+            }
+            .stat-lbl {
+                font-size: 0.65rem;
+                color: var(--text3);
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                margin-bottom: 2px;
+            }
+            .stat-val {
+                font-size: 1.6rem;
+                font-weight: 800;
+                color: var(--text);
+            }
+
+            .new-record {
+                font-size: 0.75rem;
+                color: var(--yellow);
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                margin-bottom: 16px;
+                animation: blink 1s infinite;
+            }
+
+            .missed-section {
+                text-align: left;
+                margin-bottom: 20px;
+            }
+            .missed-lbl {
+                font-size: 0.68rem;
+                color: var(--text3);
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                margin-bottom: 10px;
+            }
+            .missed-item {
+                padding: 10px 14px;
+                border-radius: 3px;
+                background: var(--bg);
+                border: 1px solid var(--border);
+                margin-bottom: 8px;
+                font-size: 0.8rem;
+            }
+            .missed-item .mi-name {
+                font-weight: 600;
+                color: var(--text);
+                margin-bottom: 6px;
+            }
+            .missed-row {
+                display: flex;
+                gap: 8px;
+                align-items: flex-start;
+                margin-top: 4px;
+            }
+            .mi-label {
+                font-size: 0.65rem;
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                padding: 2px 6px;
+                border-radius: 2px;
+                flex-shrink: 0;
+                margin-top: 2px;
+            }
+            .mi-label.chosen {
+                background: rgba(224, 82, 82, 0.15);
+                border: 1px solid rgba(224, 82, 82, 0.3);
+                color: var(--red);
+            }
+            .mi-label.correct {
+                background: rgba(76, 175, 110, 0.12);
+                border: 1px solid rgba(76, 175, 110, 0.3);
+                color: var(--green);
+            }
+            .mi-label.timeout {
+                background: rgba(100, 100, 100, 0.15);
+                border: 1px solid var(--border);
+                color: var(--text3);
+            }
+            .mi-eq {
+                flex: 1;
+                overflow-x: auto;
+            }
+
+            .btn-row {
+                display: flex;
+                gap: 10px;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            /* ── RESPONSIVE ──────────────────────────── */
+            @media (max-width: 600px) {
+                .game-hud {
+                    gap: 10px;
+                }
+                .game-body {
+                    padding: 12px 14px 16px;
+                    gap: 10px;
+                }
+                .question-card {
+                    padding: 16px;
+                }
+                .options-grid {
+                    gap: 8px;
+                }
+                .opt {
+                    padding: 11px 12px;
+                }
+                .go-card {
+                    padding: 24px 18px;
+                }
+                .mode-grid {
+                    flex-direction: column;
+                    align-items: stretch;
+                    width: 100%;
+                    max-width: 700px;
+                }
+                .mode-card {
+                    width: 100%;
+                    flex: none;
+                    min-width: auto;
+                    max-width: none;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="bg"></canvas>
+        <canvas id="confetti"></canvas>
+        <div class="flash" id="flash"></div>
+        <div class="combo-pop" id="combo-pop"></div>
+        <div class="lvlup-overlay" id="lvlup-overlay">
+            <div class="lvlup-text" id="lvlup-text"></div>
+        </div>
+        <div class="feedback" id="feedback"></div>
+
+        <!-- ════════════════ START ════════════════ -->
+        <div class="screen active" id="start-screen">
+            <a href="../index.html" class="back-btn">← Back</a>
+            <div class="wordmark">Chem<span>Groups</span></div>
+
+            <div class="hs-row" id="hs-row"></div>
+
+            <div class="mode-grid">
+                <div
+                    class="mode-card selected"
+                    data-mode="feature"
+                    onclick="selectMode('feature')"
+                >
+                    <div class="mode-title">Feature ID</div>
+                </div>
+                <div
+                    class="mode-card"
+                    data-mode="formula"
+                    onclick="selectMode('formula')"
+                >
+                    <div class="mode-title">Formula Match</div>
+                </div>
+                <div
+                    class="mode-card"
+                    data-mode="reaction"
+                    onclick="selectMode('reaction')"
+                >
+                    <div class="mode-title">Reaction Match</div>
+                </div>
+            </div>
+
+            <div class="filter-box">
+                <div class="filter-label">Practice Topics</div>
+                <div class="chips" id="chips"></div>
+            </div>
+
+            <button class="btn-primary" onclick="startGame()">PLAY</button>
+        </div>
+
+        <!-- ════════════════ GAME ════════════════ -->
+        <div class="screen" id="game-screen">
+            <div class="game-top">
+                <div class="game-hud">
+                    <div class="lives" id="lives"></div>
+                    <div class="hud-group">
+                        <div class="hud-lbl">Level</div>
+                        <div class="hud-val c-level" id="hud-level">1</div>
+                    </div>
+                    <div id="streak-wrap">
+                        <div class="streak-badge" id="streak-badge">×1</div>
+                    </div>
+                    <div class="hud-group ml-auto">
+                        <div class="hud-lbl">Score</div>
+                        <div class="hud-val c-score" id="hud-score">0</div>
+                    </div>
+                </div>
+                <div class="time-track">
+                    <div
+                        class="time-fill"
+                        id="time-fill"
+                        style="width: 100%"
+                    ></div>
+                </div>
+                <div class="xp-track">
+                    <div class="xp-fill" id="xp-fill" style="width: 0%"></div>
+                </div>
+                <div class="xp-lbl" id="xp-lbl">0 / 10 to next level</div>
+            </div>
+
+            <div class="game-body-wrap">
+                <div class="game-body" id="game-body">
+                    <div class="q-meta">
+                        <div class="tag tag-mode" id="tag-mode">—</div>
+                        <div class="tag tag-topic" id="tag-topic">—</div>
+                        <div class="q-num" id="q-num">Q1</div>
+                    </div>
+
+                    <div class="question-card">
+                        <div class="q-prompt" id="q-prompt"></div>
+                        <div id="q-content"></div>
+                    </div>
+
+                    <div class="options-grid" id="opts"></div>
+                    <button
+                        class="submit-btn"
+                        id="submit-btn"
+                        onclick="submitReaction()"
+                    >
+                        Submit Answer
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ════════════════ GAME OVER ════════════════ -->
+        <div class="screen" id="go-screen">
+            <div class="go-card">
+                <div class="go-title" id="go-title">GAME OVER</div>
+                <div class="go-sub" id="go-sub"></div>
+                <div class="stats-grid">
+                    <div class="stat">
+                        <div class="stat-lbl">Score</div>
+                        <div class="stat-val" id="go-score">0</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-lbl">Level</div>
+                        <div class="stat-val" id="go-level">1</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-lbl">Correct</div>
+                        <div class="stat-val" id="go-correct">0</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-lbl">Best Streak</div>
+                        <div class="stat-val" id="go-streak">0</div>
+                    </div>
+                </div>
+                <div class="new-record" id="new-record" style="display: none">
+                    ✦ NEW HIGH SCORE ✦
+                </div>
+                <div class="missed-section" id="missed"></div>
+                <div class="btn-row">
+                    <button class="btn-primary" onclick="startGame()">
+                        PLAY AGAIN
+                    </button>
+                    <button
+                        class="btn-ghost"
+                        onclick="showScreen('start-screen')"
+                    >
+                        MENU
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // ═══════════════════════════════════════════════════
+            //  FUNCTIONAL GROUP DATA
+            // ═══════════════════════════════════════════════════
+            const GROUPS = [
+                // ── Hydrocarbons ──────────────────────────────────────
+                {
+                    id: "alkane",
+                    name: "Alkane",
+                    topic: "Hydrocarbons",
+                    tex: "\\text{C}_{n}\\text{H}_{2n+2}",
+                    hl: false,
+                    syms: {
+                        "\\text{C-C}": "carbon\u2013carbon single bond",
+                        "\\text{C-H}": "carbon\u2013hydrogen bond",
+                        "\\text{C}_{n}\\text{H}_{2n+2}": "saturated hydrocarbon general formula",
+                    },
+                    scenes: [
+                        "Burns completely in excess oxygen to produce CO\u2082 and H\u2082O",
+                        "Reacts with Cl\u2082 under UV light via free-radical substitution",
+                        "Does not decolourise bromine water \u2014 the solution stays orange",
+                    ],
+                },
+                {
+                    id: "alkene",
+                    name: "Alkene",
+                    topic: "Hydrocarbons",
+                    tex: "\\text{R-CH=CH-R}'",
+                    hl: false,
+                    syms: {
+                        "\\text{C=C}": "carbon\u2013carbon double bond",
+                        "\\text{R}": "alkyl group / hydrocarbon chain",
+                    },
+                    scenes: [
+                        "Decolourises bromine water via electrophilic addition",
+                        "Undergoes addition polymerisation to form a poly(alkene)",
+                        "Reacts with H\u2082 in the presence of a Ni catalyst (hydrogenation)",
+                    ],
+                },
+                {
+                    id: "alkyne",
+                    name: "Alkyne",
+                    topic: "Hydrocarbons",
+                    tex: "\\text{R-C{\\equiv}C-R}'",
+                    hl: false,
+                    syms: {
+                        "\\text{C{\\equiv}C}": "carbon\u2013carbon triple bond",
+                        "\\text{R}": "alkyl group / hydrocarbon chain",
+                    },
+                    scenes: [
+                        "Undergoes addition reactions with two equivalents of HBr",
+                        "Can be hydrogenated to an alkene (one H\u2082) or alkane (two H\u2082) using Ni catalyst",
+                        "The simplest example (ethyne / acetylene) is used in oxyacetylene welding",
+                    ],
+                },
+
+                // ── Haloalkanes ───────────────────────────────────────
+                {
+                    id: "haloalkane",
+                    name: "Haloalkane",
+                    topic: "Haloalkanes",
+                    tex: "\\text{R-X}",
+                    hl: false,
+                    syms: {
+                        "\\text{R}": "alkyl group / hydrocarbon chain",
+                        "\\text{X}": "halogen atom (F, Cl, Br or I)",
+                        "\\text{R-X}": "haloalkane general formula",
+                    },
+                    scenes: [
+                        "Undergoes nucleophilic substitution with OH\u207b to produce an alcohol",
+                        "Undergoes elimination with hot alcoholic KOH to produce an alkene",
+                        "Rate of hydrolysis increases down Group 17: F < Cl < Br < I",
+                    ],
+                },
+
+                // ── Hydroxy Groups ────────────────────────────────────
+                {
+                    id: "alcohol",
+                    name: "Alcohol",
+                    topic: "Hydroxy Groups",
+                    tex: "\\text{R-OH}",
+                    hl: false,
+                    syms: {
+                        "\\text{-OH}": "hydroxyl group",
+                        "\\text{R}": "alkyl group / hydrocarbon chain",
+                    },
+                    scenes: [
+                        "Oxidised by acidified K\u2082Cr\u2082O\u2087: primary \u2192 aldehyde \u2192 carboxylic acid; secondary \u2192 ketone",
+                        "Reacts with a carboxylic acid (+ acid catalyst) via condensation to form an ester",
+                        "Forms intermolecular hydrogen bonds, giving higher boiling points than comparable alkanes",
+                    ],
+                },
+
+                // ── Carbonyl Groups ───────────────────────────────────
+                {
+                    id: "aldehyde",
+                    name: "Aldehyde",
+                    topic: "Carbonyl Groups",
+                    tex: "\\text{R-CHO}",
+                    hl: false,
+                    syms: {
+                        "\\text{-CHO}": "aldehyde group (carbonyl at chain end)",
+                        "\\text{C=O}": "carbonyl group",
+                        "\\text{R}": "alkyl group / hydrocarbon chain",
+                    },
+                    scenes: [
+                        "Gives a silver mirror with Tollens\u2019 reagent \u2014 confirms it is a reducing agent",
+                        "Oxidised to a carboxylic acid by acidified K\u2082Cr\u2082O\u2087 (orange \u2192 green)",
+                        "Reduced to a primary alcohol by NaBH\u2084",
+                    ],
+                },
+                {
+                    id: "ketone",
+                    name: "Ketone",
+                    topic: "Carbonyl Groups",
+                    tex: "\\text{R-CO-R}'",
+                    hl: false,
+                    syms: {
+                        "\\text{C=O}": "carbonyl group (not at chain end)",
+                        "\\text{R}": "alkyl groups on either side of the carbonyl",
+                    },
+                    scenes: [
+                        "Does NOT react with Tollens\u2019 reagent \u2014 distinguishes it from an aldehyde",
+                        "Reduced to a secondary alcohol by NaBH\u2084",
+                        "Cannot be further oxidised under normal laboratory conditions",
+                    ],
+                },
+
+                // ── Carboxyl Groups ───────────────────────────────────
+                {
+                    id: "carboxylic_acid",
+                    name: "Carboxylic Acid",
+                    topic: "Carboxyl Groups",
+                    tex: "\\text{R-COOH}",
+                    hl: false,
+                    syms: {
+                        "\\text{-COOH}": "carboxyl group",
+                        "\\text{-OH}": "hydroxyl part of the carboxyl group",
+                        "\\text{C=O}": "carbonyl part of the carboxyl group",
+                    },
+                    scenes: [
+                        "Reacts with an alcohol (+ acid catalyst) via condensation to form an ester + water",
+                        "Neutralised by Na\u2082CO\u2083, releasing CO\u2082 gas \u2014 confirms acidic nature",
+                        "Forms dimers in solution via pairs of hydrogen bonds between \u2013COOH groups",
+                    ],
+                },
+                {
+                    id: "ester",
+                    name: "Ester",
+                    topic: "Carboxyl Groups",
+                    tex: "\\text{R-COO-R}'",
+                    hl: false,
+                    syms: {
+                        "\\text{-COO-}": "ester linkage",
+                        "\\text{R}": "alkyl group from the acid side",
+                        "\\text{R}'": "alkyl group from the alcohol side",
+                    },
+                    scenes: [
+                        "Formed by condensation of a carboxylic acid and an alcohol, releasing water",
+                        "Hydrolysis with NaOH (saponification) yields a carboxylate salt + alcohol",
+                        "Many naturally occurring esters give fruits and flowers their characteristic aromas",
+                    ],
+                },
+
+                // ── Amines (HL) ───────────────────────────────────────
+                {
+                    id: "amine",
+                    name: "Amine",
+                    topic: "Amines (HL)",
+                    tex: "\\text{R-NH}_2",
+                    hl: true,
+                    syms: {
+                        "\\text{-NH}_2": "amino group (primary amine)",
+                        "\\text{N}": "nitrogen atom \u2014 lone pair makes it a base",
+                        "\\text{R}": "alkyl group / hydrocarbon chain",
+                    },
+                    scenes: [
+                        "Acts as a Br\u00f8nsted\u2013Lowry base by accepting a proton from water or an acid",
+                        "Reacts with a carboxylic acid to form an amide via condensation",
+                        "Primary amines have higher boiling points than alkanes due to hydrogen bonding",
+                    ],
+                },
+
+                // ── Amides (HL) ───────────────────────────────────────
+                {
+                    id: "amide",
+                    name: "Amide",
+                    topic: "Amides (HL)",
+                    tex: "\\text{R-CONH}_2",
+                    hl: true,
+                    syms: {
+                        "\\text{-CONH}_2": "amide group",
+                        "\\text{-NH}_2": "amino part of the amide",
+                        "\\text{C=O}": "carbonyl part of the amide",
+                    },
+                    scenes: [
+                        "Formed from a carboxylic acid and an amine via condensation (releasing water)",
+                        "The peptide bond linking amino acids in proteins is an amide linkage",
+                        "Hydrolysis with NaOH solution yields a carboxylate salt and ammonia",
+                    ],
+                },
+
+                // ── Ethers (HL) ───────────────────────────────────────
+                {
+                    id: "ether",
+                    name: "Ether",
+                    topic: "Ethers (HL)",
+                    tex: "\\text{R-O-R}'",
+                    hl: true,
+                    syms: {
+                        "\\text{-O-}": "ether linkage (ether oxygen)",
+                        "\\text{R}": "alkyl groups on either side of the oxygen",
+                    },
+                    scenes: [
+                        "Relatively unreactive; widely used as solvents (e.g., diethyl ether in extractions)",
+                        "Does NOT react with Na metal or NaOH \u2014 contrast with alcohols",
+                        "Formed by dehydration of two alcohol molecules (Williamson synthesis for unsymmetrical ethers)",
+                    ],
+                },
+
+                // ── Acid Derivatives (HL) ─────────────────────────────
+                {
+                    id: "acyl_chloride",
+                    name: "Acyl Chloride",
+                    topic: "Acid Derivatives (HL)",
+                    tex: "\\text{R-COCl}",
+                    hl: true,
+                    syms: {
+                        "\\text{-COCl}": "acyl chloride group",
+                        "\\text{-Cl}": "chlorine \u2014 the leaving group",
+                        "\\text{C=O}": "carbonyl group",
+                    },
+                    scenes: [
+                        "Reacts vigorously with water to give a carboxylic acid + HCl \u2014 more reactive than an ester",
+                        "Reacts with an alcohol to form an ester without requiring an acid catalyst",
+                        "Reacts with an amine to form an amide, producing HCl as a by-product",
+                    ],
+                },
+
+                // ── Nitriles (HL) ─────────────────────────────────────
+                {
+                    id: "nitrile",
+                    name: "Nitrile",
+                    topic: "Nitriles (HL)",
+                    tex: "\\text{R-C{\\equiv}N}",
+                    hl: true,
+                    syms: {
+                        "\\text{-C{\\equiv}N}": "nitrile (cyano) group",
+                        "\\text{C{\\equiv}N}": "carbon\u2013nitrogen triple bond",
+                        "\\text{R}": "alkyl group / hydrocarbon chain",
+                    },
+                    scenes: [
+                        "Hydrolysis with dilute acid and water gives a carboxylic acid",
+                        "Reduction with LiAlH\u2084 (or H\u2082/Ni) gives a primary amine",
+                        "Used in nucleophilic substitution with haloalkanes to extend the carbon chain by one",
+                    ],
+                },
+
+                // ── Aromatic (HL) ─────────────────────────────────────
+                {
+                    id: "phenol",
+                    name: "Phenol",
+                    topic: "Aromatic (HL)",
+                    tex: "\\text{Ar-OH}",
+                    hl: true,
+                    syms: {
+                        "\\text{Ar}": "arene (benzene) ring",
+                        "\\text{-OH}": "hydroxyl group bonded to arene ring",
+                        "\\text{Ar-OH}": "phenol general formula",
+                    },
+                    scenes: [
+                        "More acidic than alcohols: reacts with NaOH to form sodium phenoxide (R-OH does not)",
+                        "Reacts with bromine water without a catalyst \u2014 the ring is activated by the \u2013OH group",
+                        "Used as an antiseptic (carbolic acid) and in manufacture of phenol-formaldehyde resins",
+                    ],
+                },
+            ];
+
+            // ═══════════════════════════════════════════════════
+            //  KaTeX render helpers
+            // ═══════════════════════════════════════════════════
+            function tex(str, block = false) {
+                try {
+                    return katex.renderToString(str, {
+                        displayMode: block,
+                        throwOnError: false,
+                    });
+                } catch (e) {
+                    return `<span style="color:var(--red)">${str}</span>`;
+                }
+            }
+            function texInline(str) {
+                return tex(str, false);
+            }
+            function texBlock(str) {
+                return tex(str, true);
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  BACKGROUND CANVAS (subtle dots)
+            // ═══════════════════════════════════════════════════
+            const bgC = document.getElementById("bg");
+            const bgX = bgC.getContext("2d");
+
+            function resizeBg() {
+                bgC.width = window.innerWidth;
+                bgC.height = window.innerHeight;
+                drawBg();
+            }
+            function drawBg() {
+                bgX.clearRect(0, 0, bgC.width, bgC.height);
+                const sp = 40;
+                for (let x = sp / 2; x < bgC.width; x += sp)
+                    for (let y = sp / 2; y < bgC.height; y += sp) {
+                        bgX.beginPath();
+                        bgX.arc(x, y, 1, 0, Math.PI * 2);
+                        bgX.fillStyle = "rgba(255,255,255,0.05)";
+                        bgX.fill();
+                    }
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  CONFETTI
+            // ═══════════════════════════════════════════════════
+            const cfC = document.getElementById("confetti");
+            const cfX = cfC.getContext("2d");
+            let cfp = [];
+
+            function resizeCf() {
+                cfC.width = window.innerWidth;
+                cfC.height = window.innerHeight;
+            }
+
+            function burst(x, y, n = 40) {
+                const cols = [
+                    "#58a6ff",
+                    "#bc8cff",
+                    "#3fb950",
+                    "#d29922",
+                    "#f85149",
+                ];
+                for (let i = 0; i < n; i++) {
+                    const a = Math.random() * Math.PI * 2;
+                    const s = 3 + Math.random() * 7;
+                    cfp.push({
+                        x,
+                        y,
+                        vx: Math.cos(a) * s,
+                        vy: Math.sin(a) * s - 3,
+                        col: cols[Math.floor(Math.random() * cols.length)],
+                        life: 1,
+                        dec: 0.018 + Math.random() * 0.018,
+                        w: 4 + Math.random() * 5,
+                        h: 2 + Math.random() * 3,
+                        rot: Math.random() * Math.PI,
+                        rv: (Math.random() - 0.5) * 0.15,
+                    });
+                }
+            }
+
+            function animCf() {
+                cfX.clearRect(0, 0, cfC.width, cfC.height);
+                cfp = cfp.filter((p) => p.life > 0);
+                cfp.forEach((p) => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.25;
+                    p.rot += p.rv;
+                    p.life -= p.dec;
+                    cfX.save();
+                    cfX.translate(p.x, p.y);
+                    cfX.rotate(p.rot);
+                    cfX.globalAlpha = Math.max(0, p.life);
+                    cfX.fillStyle = p.col;
+                    cfX.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+                    cfX.restore();
+                });
+                requestAnimationFrame(animCf);
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  AUDIO
+            // ═══════════════════════════════════════════════════
+            let _ac = null;
+            function ac() {
+                if (!_ac)
+                    _ac = new (window.AudioContext ||
+                        window.webkitAudioContext)();
+                return _ac;
+            }
+
+            function snd(type) {
+                try {
+                    const c = ac(),
+                        now = c.currentTime;
+                    const osc = c.createOscillator(),
+                        g = c.createGain();
+                    osc.connect(g);
+                    g.connect(c.destination);
+                    switch (type) {
+                        case "ok":
+                            osc.type = "sine";
+                            osc.frequency.setValueAtTime(440, now);
+                            osc.frequency.linearRampToValueAtTime(
+                                880,
+                                now + 0.18,
+                            );
+                            g.gain.setValueAtTime(0.25, now);
+                            g.gain.linearRampToValueAtTime(0, now + 0.3);
+                            osc.start(now);
+                            osc.stop(now + 0.3);
+                            break;
+                        case "no":
+                            osc.type = "sawtooth";
+                            osc.frequency.setValueAtTime(280, now);
+                            osc.frequency.linearRampToValueAtTime(
+                                140,
+                                now + 0.22,
+                            );
+                            g.gain.setValueAtTime(0.18, now);
+                            g.gain.linearRampToValueAtTime(0, now + 0.28);
+                            osc.start(now);
+                            osc.stop(now + 0.28);
+                            break;
+                        case "lvl": {
+                            [523, 659, 784, 1047].forEach((f, i) => {
+                                const o = c.createOscillator(),
+                                    g2 = c.createGain();
+                                o.connect(g2);
+                                g2.connect(c.destination);
+                                o.type = "sine";
+                                o.frequency.setValueAtTime(f, now + i * 0.1);
+                                g2.gain.setValueAtTime(0.2, now + i * 0.1);
+                                g2.gain.linearRampToValueAtTime(
+                                    0,
+                                    now + i * 0.1 + 0.2,
+                                );
+                                o.start(now + i * 0.1);
+                                o.stop(now + i * 0.1 + 0.3);
+                            });
+                            break;
+                        }
+                        case "str":
+                            osc.type = "triangle";
+                            osc.frequency.setValueAtTime(600, now);
+                            osc.frequency.linearRampToValueAtTime(
+                                900,
+                                now + 0.12,
+                            );
+                            g.gain.setValueAtTime(0.2, now);
+                            g.gain.linearRampToValueAtTime(0, now + 0.2);
+                            osc.start(now);
+                            osc.stop(now + 0.2);
+                            break;
+                        case "tick":
+                            osc.type = "sine";
+                            osc.frequency.setValueAtTime(700, now);
+                            g.gain.setValueAtTime(0.04, now);
+                            g.gain.linearRampToValueAtTime(0, now + 0.05);
+                            osc.start(now);
+                            osc.stop(now + 0.05);
+                            break;
+                    }
+                } catch (e) {}
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  GAME STATE
+            // ═══════════════════════════════════════════════════
+            const HS_KEYS = {
+                feature:  "cfg_hs_feature",
+                formula:  "cfg_hs_formula",
+                reaction: "cfg_hs_reaction",
+            };
+
+            const GS = {
+                mode: "feature",
+                activeTopics: new Set(),
+                score: 0,
+                lives: 3,
+                level: 1,
+                streak: 0,
+                maxStreak: 0,
+                correctInLevel: 0,
+                totalCorrect: 0,
+                totalQ: 0,
+                missed: [],
+                running: false,
+                timeMax: 10,
+                timeLeft: 10,
+                timerId: null,
+                answered: false,
+                curEq: null,
+                scenarioPicked: new Set(),
+                correctScenarioId: null,
+                lastChosenTex: null,
+                lastChosenName: null,
+                symbolCorrectMeaning: null,
+            };
+
+            function getHS(mode) {
+                return parseInt(localStorage.getItem(HS_KEYS[mode]) || "0");
+            }
+            function setHS(mode, val) {
+                localStorage.setItem(HS_KEYS[mode], val);
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  TOPICS / CHIPS
+            // ═══════════════════════════════════════════════════
+            const TOPICS = [...new Set(GROUPS.map((g) => g.topic))];
+
+            const SL_TOPICS = new Set(
+                TOPICS.filter((t) => !t.includes("(HL)")),
+            );
+
+            function clearChipSelection(c) {
+                document
+                    .querySelectorAll(".chip")
+                    .forEach((x) => x.classList.remove("on"));
+                GS.activeTopics.clear();
+            }
+
+            function initChips() {
+                const c = document.getElementById("chips");
+                c.innerHTML = "";
+
+                // All Topics
+                const all = document.createElement("div");
+                all.className = "chip on";
+                all.textContent = "All Topics";
+                all.dataset.t = "ALL";
+                all.onclick = () => {
+                    clearChipSelection(c);
+                    all.classList.add("on");
+                };
+                c.appendChild(all);
+
+                // SL Only
+                const sl = document.createElement("div");
+                sl.className = "chip";
+                sl.textContent = "SL Only";
+                sl.dataset.t = "SL";
+                sl.onclick = () => {
+                    clearChipSelection(c);
+                    sl.classList.add("on");
+                    SL_TOPICS.forEach((t) => GS.activeTopics.add(t));
+                };
+                c.appendChild(sl);
+
+                TOPICS.forEach((t) => {
+                    const ch = document.createElement("div");
+                    ch.className = "chip";
+                    ch.textContent = t;
+                    ch.dataset.t = t;
+                    ch.onclick = () => {
+                        c.querySelector('[data-t="ALL"]').classList.remove(
+                            "on",
+                        );
+                        c.querySelector('[data-t="SL"]').classList.remove("on");
+                        GS.activeTopics.has(t)
+                            ? (GS.activeTopics.delete(t),
+                              ch.classList.remove("on"))
+                            : (GS.activeTopics.add(t), ch.classList.add("on"));
+                        if (!GS.activeTopics.size)
+                            c.querySelector('[data-t="ALL"]').classList.add(
+                                "on",
+                            );
+                    };
+                    c.appendChild(ch);
+                });
+            }
+
+            function poolGroups() {
+                if (!GS.activeTopics.size) return GROUPS;
+                return GROUPS.filter((g) => GS.activeTopics.has(g.topic));
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  HIGH SCORE DISPLAY
+            // ═══════════════════════════════════════════════════
+            function renderHSRow() {
+                const r = document.getElementById("hs-row");
+                r.innerHTML = "";
+                ["feature", "formula", "reaction"].forEach((m) => {
+                    const d = document.createElement("div");
+                    d.className = "hs-card";
+                    const labels = {
+                        feature:  "Feature ID",
+                        formula:  "Formula Match",
+                        reaction: "Reaction Match",
+                    };
+                    d.innerHTML = `<div class="hs-mode">${labels[m]}</div><div class="hs-val">${getHS(m).toLocaleString()}</div>`;
+                    r.appendChild(d);
+                });
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  SCREENS
+            // ═══════════════════════════════════════════════════
+            function showScreen(id) {
+                document
+                    .querySelectorAll(".screen")
+                    .forEach((s) => s.classList.remove("active"));
+                document.getElementById(id).classList.add("active");
+            }
+
+            function selectMode(m) {
+                GS.mode = m;
+                document
+                    .querySelectorAll(".mode-card")
+                    .forEach((c) =>
+                        c.classList.toggle("selected", c.dataset.mode === m),
+                    );
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  START
+            // ═══════════════════════════════════════════════════
+            function startGame() {
+                Object.assign(GS, {
+                    score: 0,
+                    lives: 3,
+                    level: 1,
+                    streak: 0,
+                    maxStreak: 0,
+                    correctInLevel: 0,
+                    totalCorrect: 0,
+                    totalQ: 0,
+                    missed: [],
+                    running: true,
+                    timeMax: 10,
+                    answered: false,
+                    scenarioPicked: new Set(),
+                    correctScenarioId: null,
+                    lastChosenTex: null,
+                    lastChosenName: null,
+                    symbolCorrectMeaning: null,
+                });
+                updateHUD();
+                showScreen("game-screen");
+                nextQ();
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  HUD
+            // ═══════════════════════════════════════════════════
+            function mult() {
+                if (GS.streak >= 10) return 10;
+                if (GS.streak >= 6) return 5;
+                if (GS.streak >= 3) return 2;
+                return 1;
+            }
+
+            function updateHUD() {
+                const lv = document.getElementById("lives");
+                lv.innerHTML = "";
+                for (let i = 0; i < 3; i++) {
+                    const h = document.createElement("div");
+                    h.className = "heart" + (i >= GS.lives ? " lost" : "");
+                    h.textContent = "\u2665";
+                    lv.appendChild(h);
+                }
+                document.getElementById("hud-score").textContent =
+                    GS.score.toLocaleString();
+                document.getElementById("hud-level").textContent = GS.level;
+                const sb = document.getElementById("streak-badge");
+                const m = mult();
+                sb.textContent = `\u00d7${m}`;
+                sb.className = "streak-badge" + (GS.streak >= 6 ? " fire" : "");
+                document.getElementById("xp-fill").style.width =
+                    (GS.correctInLevel / 10) * 100 + "%";
+                document.getElementById("xp-lbl").textContent =
+                    `${GS.correctInLevel}/10 to next level`;
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  QUESTIONS
+            // ═══════════════════════════════════════════════════
+            function nextQ() {
+                if (!GS.running) return;
+                stopTimer();
+                GS.answered = false;
+                GS.scenarioPicked = new Set();
+                document.getElementById("submit-btn").style.display = "none";
+
+                const pool = poolGroups();
+                if (pool.length < 4) {
+                    alert("Select topics with \u22654 functional groups.");
+                    showScreen("start-screen");
+                    return;
+                }
+
+                const grp = pool[Math.floor(Math.random() * pool.length)];
+                GS.curEq = grp;
+                GS.totalQ++;
+
+                document.getElementById("tag-topic").textContent = grp.topic;
+                document.getElementById("q-num").textContent = `Q${GS.totalQ}`;
+
+                if (GS.mode === "feature") buildFeature(grp, pool);
+                else if (GS.mode === "formula") buildFormula(grp, pool);
+                else buildReaction(grp, pool);
+
+                startTimer();
+            }
+
+            // ── Feature ID ────────────────────────────────────
+            function buildFeature(grp, pool) {
+                document.getElementById("tag-mode").textContent = "Feature ID";
+                const syms = Object.keys(grp.syms);
+                const sym = syms[Math.floor(Math.random() * syms.length)];
+                const correct = grp.syms[sym];
+
+                document.getElementById("q-prompt").textContent =
+                    "What does the highlighted part represent?";
+                document.getElementById("q-content").innerHTML =
+                    `<div class="eq-large">${texBlock(grp.tex)}</div>` +
+                    `<div class="sym-question">What is <span class="sym-hl">${texInline(sym)}</span> in this formula?</div>`;
+
+                // distractors from all groups
+                const pool2 = [];
+                GROUPS.forEach((g) =>
+                    Object.values(g.syms).forEach((v) => {
+                        if (v !== correct && !pool2.includes(v)) pool2.push(v);
+                    }),
+                );
+                shuffle(pool2);
+                const opts = shuffle([correct, ...pool2.slice(0, 3)]);
+                GS.symbolCorrectMeaning = correct;
+                buildOpts(
+                    opts,
+                    (o) => o === correct,
+                    (o) => `<span class="opt-body">${o}</span>`,
+                    "text",
+                    (o) => null,
+                    (o) => o,
+                );
+            }
+
+            // ── Formula Match ─────────────────────────────────
+            function buildFormula(grp, pool) {
+                document.getElementById("tag-mode").textContent =
+                    "Formula Match";
+                document.getElementById("q-prompt").textContent =
+                    "Which formula represents this functional group?";
+                document.getElementById("q-content").innerHTML =
+                    `<div style="font-size:1.15rem;font-weight:700;color:var(--text)">${grp.name}</div>` +
+                    `<div style="font-size:.8rem;color:var(--text3);margin-top:4px">${grp.topic}</div>`;
+
+                const others = shuffle(
+                    pool.filter((g) => g.id !== grp.id),
+                ).slice(0, 3);
+                const opts = shuffle([grp, ...others]);
+                buildOpts(
+                    opts,
+                    (o) => o.id === grp.id,
+                    (o) => `<div class="opt-body">${texBlock(o.tex)}</div>`,
+                    "eq",
+                    (o) => o.tex,
+                    (o) => o.name,
+                );
+            }
+
+            // ── Reaction Match ────────────────────────────────
+            function buildReaction(grp, pool) {
+                document.getElementById("tag-mode").textContent =
+                    "Reaction Match";
+                GS.correctScenarioId = grp.id;
+                const scene =
+                    grp.scenes[Math.floor(Math.random() * grp.scenes.length)];
+
+                document.getElementById("q-prompt").textContent =
+                    "Which functional group is involved in this reaction?";
+                document.getElementById("q-content").innerHTML =
+                    `<div style="font-size:1.05rem;line-height:1.65;color:var(--text)">${scene}</div>` +
+                    `<div class="scenario-hint">Select all that apply, then hit Submit.</div>`;
+
+                const others = shuffle(
+                    pool.filter((g) => g.id !== grp.id),
+                ).slice(0, 3);
+                const opts = shuffle([grp, ...others]);
+                buildScenarioOpts(opts);
+                document.getElementById("submit-btn").style.display = "block";
+            }
+
+            // ── Build option buttons ─────────────────────────
+            const LETTERS = ["A", "B", "C", "D"];
+
+            function buildOpts(
+                opts,
+                isCorrect,
+                render,
+                style,
+                getChosenTex,
+                getChosenName,
+            ) {
+                const g = document.getElementById("opts");
+                g.innerHTML = "";
+                opts.forEach((o, i) => {
+                    const b = document.createElement("button");
+                    b.className = "opt";
+                    b.innerHTML = `<span class="opt-letter">${LETTERS[i]}</span>${render(o)}`;
+                    b.onclick = () =>
+                        pickOpt(
+                            b,
+                            isCorrect(o),
+                            () => {
+                                g.querySelectorAll(".opt").forEach((btn, j) => {
+                                    if (isCorrect(opts[j]))
+                                        btn.classList.add("correct");
+                                });
+                            },
+                            getChosenTex ? getChosenTex(o) : null,
+                            getChosenName ? getChosenName(o) : null,
+                        );
+                    g.appendChild(b);
+                });
+            }
+
+            function buildScenarioOpts(opts) {
+                const g = document.getElementById("opts");
+                g.innerHTML = "";
+                opts.forEach((grp, i) => {
+                    const b = document.createElement("button");
+                    b.className = "opt";
+                    b.dataset.id = grp.id;
+                    b.innerHTML =
+                        `<span class="opt-letter">${LETTERS[i]}</span>` +
+                        `<div class="opt-body">${texBlock(grp.tex)}<div class="opt-eq-name">${grp.name}</div></div>`;
+                    b.onclick = () => toggleScenarioOpt(b, grp.id);
+                    g.appendChild(b);
+                });
+            }
+
+            function toggleScenarioOpt(btn, id) {
+                if (GS.answered) return;
+                GS.scenarioPicked.has(id)
+                    ? (GS.scenarioPicked.delete(id),
+                      btn.classList.remove("picked"))
+                    : (GS.scenarioPicked.add(id), btn.classList.add("picked"));
+            }
+
+            function submitReaction() {
+                if (GS.answered) return;
+                GS.answered = true;
+                stopTimer();
+                const correct = GS.scenarioPicked.has(GS.correctScenarioId);
+                const pickedId = [...GS.scenarioPicked][0] || null;
+                if (pickedId) {
+                    const pickedGrp = GROUPS.find((g) => g.id === pickedId);
+                    GS.lastChosenTex = pickedGrp ? pickedGrp.tex : null;
+                    GS.lastChosenName = pickedGrp ? pickedGrp.name : null;
+                } else {
+                    GS.lastChosenTex = null;
+                    GS.lastChosenName = null;
+                }
+                document.querySelectorAll("#opts .opt").forEach((btn) => {
+                    btn.disabled = true;
+                    if (btn.dataset.id === GS.correctScenarioId)
+                        btn.classList.add("correct");
+                    else if (GS.scenarioPicked.has(btn.dataset.id))
+                        btn.classList.add("wrong");
+                });
+                resolveResult(correct);
+            }
+
+            function pickOpt(
+                clickedBtn,
+                isCorrect,
+                revealFn,
+                chosenTex,
+                chosenName,
+            ) {
+                if (GS.answered) return;
+                GS.answered = true;
+                GS.lastChosenTex = chosenTex || null;
+                GS.lastChosenName = chosenName || null;
+                stopTimer();
+                document
+                    .querySelectorAll("#opts .opt")
+                    .forEach((b) => (b.disabled = true));
+                revealFn();
+                if (!isCorrect) clickedBtn.classList.add("wrong");
+                resolveResult(isCorrect);
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  RESULT
+            // ═══════════════════════════════════════════════════
+            function resolveResult(isCorrect) {
+                if (isCorrect) {
+                    GS.streak++;
+                    GS.correctInLevel++;
+                    GS.totalCorrect++;
+                    if (GS.streak > GS.maxStreak) GS.maxStreak = GS.streak;
+
+                    const m = mult();
+                    const tb = Math.max(0, GS.timeLeft / GS.timeMax);
+                    const pts = Math.max(10, Math.round(100 * tb * m));
+                    GS.score += pts;
+
+                    snd("ok");
+                    flash("rgba(63,185,80,.08)");
+                    showFeedback(`+${pts}`, "good");
+                    scorePop(`+${pts}`, "#3fb950");
+
+                    if (
+                        GS.streak === 3 ||
+                        GS.streak === 6 ||
+                        GS.streak === 10
+                    ) {
+                        comboShow();
+                        snd("str");
+                    }
+
+                    if (GS.correctInLevel >= 10) {
+                        GS.correctInLevel = 0;
+                        GS.level++;
+                        GS.timeMax = Math.max(4, 10 - (GS.level - 1) * 0.5);
+                        lvlUpFx();
+                        snd("lvl");
+                    }
+                } else {
+                    GS.streak = 0;
+                    GS.lives--;
+                    if (!GS.missed.find((x) => x.eq.id === GS.curEq.id)) {
+                        GS.missed.push({
+                            eq: GS.curEq,
+                            chosenTex: GS.lastChosenTex,
+                            chosenName: GS.lastChosenName,
+                            timedOut: false,
+                            mode: GS.mode,
+                            correctMeaning: GS.symbolCorrectMeaning,
+                        });
+                    }
+                    snd("no");
+                    flash("rgba(248,81,73,.1)");
+                    shakeScreen();
+                    showFeedback("Wrong \u2014 " + GS.curEq.name, "bad");
+                    if (GS.lives <= 0) {
+                        updateHUD();
+                        setTimeout(gameOver, 800);
+                        return;
+                    }
+                }
+                updateHUD();
+                setTimeout(
+                    () => {
+                        if (GS.running) nextQ();
+                    },
+                    isCorrect ? 550 : 900,
+                );
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  TIMER
+            // ═══════════════════════════════════════════════════
+            function startTimer() {
+                GS.timeLeft = GS.timeMax;
+                renderTimerBar();
+                GS.timerId = setInterval(() => {
+                    GS.timeLeft -= 0.1;
+                    renderTimerBar();
+                    if (
+                        GS.timeLeft <= 3 &&
+                        GS.timeLeft > 0 &&
+                        Math.floor(GS.timeLeft * 10) % 4 === 0
+                    )
+                        snd("tick");
+                    if (GS.timeLeft <= 0) {
+                        stopTimer();
+                        if (!GS.answered) timeout();
+                    }
+                }, 100);
+            }
+
+            function stopTimer() {
+                if (GS.timerId) {
+                    clearInterval(GS.timerId);
+                    GS.timerId = null;
+                }
+            }
+
+            function renderTimerBar() {
+                const pct = Math.max(0, (GS.timeLeft / GS.timeMax) * 100);
+                const f = document.getElementById("time-fill");
+                f.style.width = pct + "%";
+                f.style.background =
+                    pct > 50
+                        ? "var(--green)"
+                        : pct > 25
+                          ? "var(--yellow)"
+                          : "var(--red)";
+            }
+
+            function timeout() {
+                GS.answered = true;
+                GS.timeLeft = 0;
+                document
+                    .querySelectorAll("#opts .opt")
+                    .forEach((b) => (b.disabled = true));
+                GS.streak = 0;
+                GS.lives--;
+                if (!GS.missed.find((x) => x.eq.id === GS.curEq.id)) {
+                    GS.missed.push({
+                        eq: GS.curEq,
+                        chosenTex: null,
+                        chosenName: null,
+                        timedOut: true,
+                        mode: GS.mode,
+                        correctMeaning: GS.symbolCorrectMeaning,
+                    });
+                }
+                snd("no");
+                flash("rgba(248,81,73,.1)");
+                shakeScreen();
+                showFeedback("Time\u2019s up \u2014 " + GS.curEq.name, "bad");
+                updateHUD();
+                if (GS.lives <= 0) {
+                    setTimeout(gameOver, 800);
+                    return;
+                }
+                setTimeout(() => {
+                    if (GS.running) nextQ();
+                }, 900);
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  EFFECTS
+            // ═══════════════════════════════════════════════════
+            function flash(col) {
+                const f = document.getElementById("flash");
+                f.style.background = col;
+                f.style.opacity = "1";
+                setTimeout(() => (f.style.opacity = "0"), 180);
+            }
+            function shakeScreen() {
+                const g = document.getElementById("game-screen");
+                g.classList.remove("shaking");
+                void g.offsetWidth;
+                g.classList.add("shaking");
+            }
+            function showFeedback(msg, type) {
+                const f = document.getElementById("feedback");
+                f.textContent = msg;
+                f.className = `feedback ${type} show`;
+                setTimeout(() => f.classList.remove("show"), 1800);
+            }
+            function scorePop(txt, col) {
+                const el = document.createElement("div");
+                el.className = "score-pop";
+                el.textContent = txt;
+                el.style.color = col;
+                el.style.left = window.innerWidth / 2 - 30 + "px";
+                el.style.top = window.innerHeight / 2 - 40 + "px";
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), 1000);
+            }
+            function comboShow() {
+                const m = mult();
+                const labels = {
+                    2: "Double!",
+                    5: "Combo \u00d75!",
+                    10: "Insane \u00d710!",
+                };
+                const cols = { 2: "#3fb950", 5: "#d29922", 10: "#db6d28" };
+                const p = document.getElementById("combo-pop");
+                p.textContent = (labels[m] || `\u00d7${m}`) + "  \ud83d\udd25";
+                p.style.color = cols[m] || "#58a6ff";
+                p.classList.add("show");
+                burst(window.innerWidth / 2, window.innerHeight / 2, 28);
+                setTimeout(() => p.classList.remove("show"), 1000);
+            }
+            function lvlUpFx() {
+                const o = document.getElementById("lvlup-overlay");
+                document.getElementById("lvlup-text").textContent =
+                    `Level ${GS.level}!`;
+                o.style.opacity = "1";
+                burst(window.innerWidth / 2, window.innerHeight / 3, 55);
+                setTimeout(() => (o.style.opacity = "0"), 1600);
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  GLOBAL XP / STREAK REPORTING
+            // ═══════════════════════════════════════════════════
+            function reportToGlobal(score) {
+                const xp =
+                    parseInt(localStorage.getItem("ibq_xp") || "0") + score;
+                localStorage.setItem("ibq_xp", xp);
+                const today = new Date().toISOString().slice(0, 10);
+                const last = localStorage.getItem("ibq_streak_date") || "";
+                const yesterday = new Date(Date.now() - 86400000)
+                    .toISOString()
+                    .slice(0, 10);
+                let streak = parseInt(
+                    localStorage.getItem("ibq_streak_count") || "0",
+                );
+                if (last === today) {
+                    /* no change */
+                } else if (last === yesterday) {
+                    streak++;
+                } else {
+                    streak = 1;
+                }
+                localStorage.setItem("ibq_streak_date", today);
+                localStorage.setItem("ibq_streak_count", streak);
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  GAME OVER
+            // ═══════════════════════════════════════════════════
+            function gameOver() {
+                reportToGlobal(GS.score);
+                GS.running = false;
+                stopTimer();
+                const prev = getHS(GS.mode);
+                const isNew = GS.score > prev;
+                if (isNew) setHS(GS.mode, GS.score);
+
+                const acc =
+                    GS.totalQ > 0
+                        ? Math.round((GS.totalCorrect / GS.totalQ) * 100)
+                        : 0;
+                const t = document.getElementById("go-title");
+                const s = document.getElementById("go-sub");
+                if (acc >= 80) {
+                    t.textContent = "Excellent!";
+                    t.className = "go-title win";
+                    s.textContent = `${acc}% accuracy \u2014 chemistry master!`;
+                } else {
+                    t.textContent = "Game Over";
+                    t.className = "go-title";
+                    s.textContent = `${acc}% accuracy \u2014 keep drilling!`;
+                }
+
+                document.getElementById("go-score").textContent =
+                    GS.score.toLocaleString();
+                document.getElementById("go-level").textContent = GS.level;
+                document.getElementById("go-correct").textContent =
+                    GS.totalCorrect;
+                document.getElementById("go-streak").textContent = GS.maxStreak;
+                document.getElementById("new-record").style.display = isNew
+                    ? "block"
+                    : "none";
+
+                const ms = document.getElementById("missed");
+                ms.innerHTML = "";
+                if (GS.missed.length) {
+                    ms.innerHTML =
+                        '<div class="missed-lbl">Missed Questions</div>';
+                    GS.missed.slice(0, 6).forEach((m) => {
+                        const d = document.createElement("div");
+                        d.className = "missed-item";
+                        let html = `<div class="mi-name">${m.eq.name}</div>`;
+                        if (m.timedOut) {
+                            html += `<div class="missed-row"><span class="mi-label timeout">Timed out</span>`;
+                            html += `<span class="mi-eq">${texInline(m.eq.tex)}</span></div>`;
+                        } else if (m.mode === "feature") {
+                            if (m.chosenName)
+                                html += `<div class="missed-row"><span class="mi-label chosen">You chose</span><span class="mi-eq" style="color:var(--red)">${m.chosenName}</span></div>`;
+                            html += `<div class="missed-row"><span class="mi-label correct">Correct</span><span class="mi-eq" style="color:var(--green)">${m.correctMeaning}</span></div>`;
+                            html += `<div class="missed-row" style="margin-top:4px"><span style="font-size:.68rem;color:var(--text3)">formula</span><span class="mi-eq" style="margin-left:8px">${texInline(m.eq.tex)}</span></div>`;
+                        } else {
+                            if (m.chosenTex)
+                                html += `<div class="missed-row"><span class="mi-label chosen">You chose</span><span class="mi-eq">${texInline(m.chosenTex)}</span></div>`;
+                            html += `<div class="missed-row"><span class="mi-label correct">Correct</span><span class="mi-eq">${texInline(m.eq.tex)}</span></div>`;
+                        }
+                        d.innerHTML = html;
+                        ms.appendChild(d);
+                    });
+                }
+
+                if (isNew) {
+                    burst(window.innerWidth / 2, window.innerHeight / 4, 70);
+                }
+                renderHSRow();
+                showScreen("go-screen");
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  UTILS
+            // ═══════════════════════════════════════════════════
+            function shuffle(a) {
+                const r = [...a];
+                for (let i = r.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [r[i], r[j]] = [r[j], r[i]];
+                }
+                return r;
+            }
+
+            // ═══════════════════════════════════════════════════
+            //  INIT (called after KaTeX loads)
+            // ═══════════════════════════════════════════════════
+            function initApp() {
+                resizeBg();
+                resizeCf();
+                initChips();
+                renderHSRow();
+                animCf();
+                window.addEventListener("resize", () => {
+                    resizeBg();
+                    resizeCf();
+                });
+            }
+        </script>
+    </body>
+</html>
