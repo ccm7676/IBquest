@@ -156,6 +156,58 @@
                 color: var(--accent);
             }
 
+            /* ── SPEED SLIDER ───────────────────────── */
+            .speed-box {
+                max-width: 700px;
+                width: 100%;
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: 4px;
+                padding: 14px 18px;
+            }
+            .speed-row {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+            .speed-edge-lbl {
+                font-size: 0.74rem;
+                color: var(--text3);
+                white-space: nowrap;
+            }
+            .speed-val {
+                font-size: 0.78rem;
+                color: var(--accent);
+                margin-top: 8px;
+                text-align: center;
+            }
+            #speed-slider {
+                flex: 1;
+                -webkit-appearance: none;
+                appearance: none;
+                height: 4px;
+                background: var(--border2);
+                border-radius: 2px;
+                outline: none;
+                cursor: pointer;
+            }
+            #speed-slider::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                background: var(--accent);
+                cursor: pointer;
+            }
+            #speed-slider::-moz-range-thumb {
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                background: var(--accent);
+                cursor: pointer;
+                border: none;
+            }
+
             /* ── GAME SCREEN ─────────────────────────── */
             #game-screen {
                 padding: 0;
@@ -685,6 +737,16 @@
             <div class="filter-box">
                 <div class="filter-label">Practice Topics</div>
                 <div class="chips" id="chips"></div>
+            </div>
+
+            <div class="speed-box">
+                <div class="filter-label">Speed</div>
+                <div class="speed-row">
+                    <span class="speed-edge-lbl">Slow</span>
+                    <input type="range" id="speed-slider" min="0.5" max="2" step="0.25" value="1" oninput="updateSpeedLabel()">
+                    <span class="speed-edge-lbl">Fast</span>
+                </div>
+                <div class="speed-val" id="speed-val">Normal · 10s per question</div>
             </div>
 
             <button class="btn-primary" onclick="startGame()">PLAY</button>
@@ -2185,6 +2247,7 @@
                 running: false,
                 timeMax: 10,
                 timeLeft: 10,
+                speedMult: 1,
                 timerId: null,
                 answered: false,
                 curEq: null,
@@ -2316,6 +2379,8 @@
             //  START
             // ═══════════════════════════════════════════════════
             function startGame() {
+                const speedMult = parseFloat(document.getElementById("speed-slider").value);
+                localStorage.setItem("phys-speed", speedMult);
                 Object.assign(GS, {
                     score: 0,
                     lives: 3,
@@ -2327,7 +2392,8 @@
                     totalQ: 0,
                     missed: [],
                     running: true,
-                    timeMax: 10,
+                    speedMult,
+                    timeMax: Math.max(3, 10 / speedMult),
                     answered: false,
                     scenarioPicked: new Set(),
                     correctScenarioId: null,
@@ -2622,7 +2688,7 @@
                     if (GS.correctInLevel >= 10) {
                         GS.correctInLevel = 0;
                         GS.level++;
-                        GS.timeMax = Math.max(4, 10 - (GS.level - 1) * 0.5);
+                        GS.timeMax = Math.max(3, (10 - (GS.level - 1) * 0.5) / GS.speedMult);
                         lvlUpFx();
                         snd("lvl");
                     }
@@ -2903,11 +2969,22 @@
             // ═══════════════════════════════════════════════════
             //  INIT (called after KaTeX loads)
             // ═══════════════════════════════════════════════════
+            const SPEED_NAMES = {0.5:"Slow",0.75:"Relaxed",1:"Normal",1.25:"Brisk",1.5:"Fast",1.75:"Intense",2:"Extreme"};
+            function updateSpeedLabel() {
+                const v = parseFloat(document.getElementById("speed-slider").value);
+                const secs = Math.round(Math.max(3, 10 / v));
+                document.getElementById("speed-val").textContent =
+                    (SPEED_NAMES[v] ?? v + "×") + " · ~" + secs + "s per question";
+            }
+
             function initApp() {
                 resizeBg();
                 resizeCf();
                 initChips();
                 renderHSRow();
+                const saved = localStorage.getItem("phys-speed");
+                if (saved) document.getElementById("speed-slider").value = saved;
+                updateSpeedLabel();
                 animCf();
                 window.addEventListener("resize", () => {
                     resizeBg();
